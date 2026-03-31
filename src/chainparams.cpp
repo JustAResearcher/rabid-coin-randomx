@@ -309,16 +309,16 @@ public:
         pchMessageStart[1] = 0xc1;
         pchMessageStart[2] = 0xb7;
         pchMessageStart[3] = 0xdc;
-        nDefaultPort = 44556;
+        nDefaultPort = 17333;
         nPruneAfterHeight = 1000;
 
-        genesis = CreateGenesisBlock(1391503289, 997879, 0x1e0ffff0, 1, 88 * COIN);
+        genesis = CreateGenesisBlock(1391503289, 2539507, 0x1e0ffff0, 1, 88 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
         digishieldConsensus.hashGenesisBlock = consensus.hashGenesisBlock;
         minDifficultyConsensus.hashGenesisBlock = consensus.hashGenesisBlock;
         auxpowConsensus.hashGenesisBlock = consensus.hashGenesisBlock;
-        // assert(consensus.hashGenesisBlock == uint256S("0xbb0a78264637406b6360aad926284d544d7049f45189db5664f3c4d07350559e"));
-        // assert(genesis.hashMerkleRoot == uint256S("0xf3ba88a8e1a70daf412b1463263504f7e1c9b27053a2f0f36d94a52f9e5d90d3"));
+        assert(consensus.hashGenesisBlock == uint256S("0xd4bc4e17108606fb84146e7548a4dab4b69bb77df448b19da74ac8d712080140"));
+        assert(genesis.hashMerkleRoot == uint256S("0xb11e57390a123182404a9352fa2cb16dc82be6bf4ef219bbbeb03102a5cb2812"));
 
         vSeeds.clear();
         // nodes with support for servicebits filtering should be at the top
