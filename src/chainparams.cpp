@@ -322,8 +322,6 @@ public:
         vSeeds.clear();
         // nodes with support for servicebits filtering should be at the top
         vSeeds.push_back(CDNSSeedData("rabidmining.com", "testnet-seed.rabidmining.com"));
-        vFixedSeeds.clear();
-        vFixedSeeds.push_back(SeedSpec6("::ffff:c2a3960f", 17333)); // 194.163.150.15
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,113); // 0x71
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,196); // 0xc4
