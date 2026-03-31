@@ -1,4 +1,5 @@
 <h1 align="center">
+<img src="https://raw.githubusercontent.com/RabidMining/Rabid-Coin/master/share/pixmaps/rabidcoin256.png" alt="RabidCoin" width="256"/>
 <br/><br/>
 RabidCoin Core [RABID]
 </h1>
