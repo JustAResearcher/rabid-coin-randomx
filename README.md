@@ -1,89 +1,97 @@
 <h1 align="center">
-<img src="https://raw.githubusercontent.com/dogecoin/dogecoin/master/share/pixmaps/dogecoin256.svg" alt="Dogecoin" width="256"/>
 <br/><br/>
-Dogecoin Core [DOGE, Ð]  
+RabidCoin Core [RABID]
 </h1>
 
-**IMPORTANT: Starting August 2024, the `master` branch has become the primary
-integration branch and has become unstable. Please check out a tagged version
-before compiling production binaries.**
+RabidCoin is a community-driven cryptocurrency powered by the GhostRider proof-of-work algorithm. It is forked from Dogecoin Core and adapted for CPU mining with GhostRider, making it ASIC-resistant and accessible to everyone.
 
-For internationalized documentation, see the index at [doc/intl](doc/intl/README.md).
+## Key Features
 
-Dogecoin is a community-driven cryptocurrency that was inspired by a Shiba Inu meme. The Dogecoin Core software allows anyone to operate a node in the Dogecoin blockchain networks and uses the Scrypt hashing method for Proof of Work. It is adapted from Bitcoin Core and other cryptocurrencies.
+- **GhostRider PoW** - 15-algorithm rotating hash function, ASIC-resistant and CPU-friendly
+- **2% Founder Fee** - Applied at block 5000+ to support ongoing development
+- **Fast Blocks** - Inherited from Dogecoin's proven blockchain architecture
+- **R Addresses** - All mainnet addresses start with `R`
 
-For information about the default fees used on the Dogecoin network, please
-refer to the [fee recommendation](doc/fee-recommendation.md).
+## Specifications
 
-## Usage 💻
+| Parameter | Value |
+|-----------|-------|
+| Algorithm | GhostRider (15 sph hash functions) |
+| Block Reward | 88 RABID |
+| Founder Fee | 2% (block 5000+) |
+| P2P Port | 7333 |
+| RPC Port | 7332 |
+| Address Prefix | R |
+| Network Magic | RABI (0x52 0x41 0x42 0x49) |
 
-To start your journey with Dogecoin Core, see the [installation guide](INSTALL.md) and the [getting started](doc/getting-started.md) tutorial.
+## Genesis Block
 
-The JSON-RPC API provided by Dogecoin Core is self-documenting and can be browsed with `dogecoin-cli help`, while detailed information for each command can be viewed with `dogecoin-cli help <command>`.
+| Parameter | Value |
+|-----------|-------|
+| Hash | `1eadba82b2a025e731d39838d0297a07fd8517a820713374b8fd1602cd38ad98` |
+| Merkle Root | `b11e57390a123182404a9352fa2cb16dc82be6bf4ef219bbbeb03102a5cb2812` |
+| Timestamp | `Rabid Mining launches Rabidcoin - GhostRider powered, Rabid to the moon!! @MiningRabid 2026` |
+| nTime | 1743380000 |
+| nNonce | 573888 |
+| nBits | 0x1e0ffff0 |
 
-### Such ports
+## Ports
 
-Dogecoin Core by default uses port `22556` for peer-to-peer communication that
-is needed to synchronize the "mainnet" blockchain and stay informed of new
-transactions and blocks. Additionally, a JSONRPC port can be opened, which
-defaults to port `22555` for mainnet nodes. It is strongly recommended to not
-expose RPC ports to the public internet.
+| Function | Mainnet | Testnet | Regtest |
+|----------|---------|---------|---------|
+| P2P | 7333 | 17333 | 18444 |
+| RPC | 7332 | 17332 | 18332 |
 
-| Function | mainnet | testnet | regtest |
-| :------- | ------: | ------: | ------: |
-| P2P      |   22556 |   44556 |   18444 |
-| RPC      |   22555 |   44555 |   18332 |
+## Building
 
-## Ongoing development - Moon plan 🌒
+### Linux
+```bash
+./autogen.sh
+./configure --with-incompatible-bdb --disable-tests --disable-bench --without-gui
+make -j$(nproc)
+```
 
-Dogecoin Core is an open source and community driven software. The development
-process is open and publicly visible; anyone can see, discuss and work on the
-software.
+### With wallet support
+```bash
+./autogen.sh
+BDB_CFLAGS="-I/usr/include" BDB_LIBS="-L/usr/lib/x86_64-linux-gnu -ldb_cxx" ./configure --with-incompatible-bdb --disable-tests --disable-bench --without-gui
+make -j$(nproc)
+```
 
-Main development resources:
+## Running
+```bash
+# Start daemon
+./src/dogecoind -daemon -rpcuser=youruser -rpcpassword=yourpass
 
-* [GitHub Projects](https://github.com/dogecoin/dogecoin/projects) is used to
-  follow planned and in-progress work for upcoming releases.
-* [GitHub Discussions](https://github.com/dogecoin/dogecoin/discussions) is used
-  to discuss features, planned and unplanned, related to both the development of
-  the Dogecoin Core software, the underlying protocols and the DOGE asset.
+# Check status
+./src/rabidcoin-cli -rpcuser=youruser -rpcpassword=yourpass getblockchaininfo
 
-### Version strategy
-Version numbers are following ```major.minor.patch``` semantics.
+# Generate address
+./src/rabidcoin-cli -rpcuser=youruser -rpcpassword=yourpass getnewaddress
+```
 
-### Branches
-There are 4 types of branches in this repository:
+## Mining
 
-- **master:** Unstable, contains the latest code under development.
-- **maintenance:** Stable, contains the latest version of previous releases,
-  which are still under active maintenance. Format: ```<version>-maint```
-- **development:** Unstable, contains new code for upcoming releases. Format: ```<version>-dev```
-- **archive:** Stable, immutable branches for old versions that no longer change
-  because they are no longer maintained.
+RabidCoin uses the GhostRider algorithm. Use XMRig with GhostRider support:
+```json
+{
+    "pools": [
+        {
+            "algo": "ghostrider",
+            "url": "YOUR_NODE_IP:7332",
+            "user": "YOUR_RABID_ADDRESS",
+            "pass": "x",
+            "daemon": true
+        }
+    ]
+}
+```
 
-***Submit your pull requests against `master`***
+## Links
 
-*Maintenance branches are exclusively mutable by release. When a release is*
-*planned, a development branch will be created and commits from master will*
-*be cherry-picked into these by maintainers.*
+- GitHub: https://github.com/RabidMining/Rabid-Coin
+- Twitter: @MiningRabid
 
-## Contributing 🤝
+## License
 
-If you find a bug or experience issues with this software, please report it
-using the [issue system](https://github.com/dogecoin/dogecoin/issues/new?assignees=&labels=bug&template=bug_report.md&title=%5Bbug%5D+).
-
-Please see [the contribution guide](CONTRIBUTING.md) to see how you can
-participate in the development of Dogecoin Core. There are often
-[topics seeking help](https://github.com/dogecoin/dogecoin/labels/help%20wanted)
-where your contributions will have high impact and get very appreciation. wow.
-
-## Very Much Frequently Asked Questions ❓
-
-Do you have a question regarding Dogecoin? An answer is perhaps already in the
-[FAQ](doc/FAQ.md) or the
-[Q&A section](https://github.com/dogecoin/dogecoin/discussions/categories/q-a)
-of the discussion board!
-
-## License - Much license ⚖️
-Dogecoin Core is released under the terms of the MIT license. See
-[COPYING](COPYING) for more information.
+RabidCoin Core is released under the terms of the MIT license. See [COPYING](COPYING) for more information.
