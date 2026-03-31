@@ -9,7 +9,7 @@
 
 #include "amount.h"
 #include "auxpow.h"
-#include "dogecoin-fees.h"
+#include "rabidcoin-fees.h"
 #include "streams.h"
 #include "tinyformat.h"
 #include "ui_interface.h"

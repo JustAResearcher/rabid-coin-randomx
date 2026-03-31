@@ -2,29 +2,23 @@
 // Copyright (c) 2009-2014 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-
 #include "primitives/pureheader.h"
-
 #include "chainparams.h"
-#include "crypto/scrypt.h"
+#include "crypto/gr_hash/gr_hash.h"
 #include "hash.h"
 #include "utilstrencodings.h"
-
 void CPureBlockHeader::SetBaseVersion(int32_t nBaseVersion, int32_t nChainId)
 {
     assert(nBaseVersion >= 1 && nBaseVersion < VERSION_AUXPOW);
     assert(!IsAuxpow());
     nVersion = nBaseVersion | (nChainId * VERSION_CHAIN_START);
 }
-
 uint256 CPureBlockHeader::GetHash() const
 {
     return SerializeHash(*this);
 }
-
 uint256 CPureBlockHeader::GetPoWHash() const
 {
-    uint256 thash;
-    scrypt_1024_1_1_256(BEGIN(nVersion), BEGIN(thash));
-    return thash;
+    const uint8_t* pbegin = (const uint8_t*)BEGIN(nVersion);
+    return GhostriderHash(pbegin, 80);
 }

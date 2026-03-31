@@ -9,8 +9,8 @@
 #include "base58.h"
 #include "checkpoints.h"
 #include "chain.h"
-#include "dogecoin.h"
-#include "dogecoin-fees.h"
+#include "rabidcoin.h"
+#include "rabidcoin-fees.h"
 #include "fs.h"
 #include "wallet/coincontrol.h"
 #include "consensus/consensus.h"
@@ -2880,7 +2880,7 @@ bool CWallet::AddAccountingEntry(const CAccountingEntry& acentry, CWalletDB *pwa
 CAmount CWallet::GetRequiredFee(const CMutableTransaction& tx, unsigned int nTxBytes)
 {
     // Dogecoin: Add an increased fee for each output that is lower than the discard threshold
-    return std::max(minTxFee.GetFee(nTxBytes) + GetDogecoinDustFee(tx.vout, discardThreshold), ::minRelayTxFeeRate.GetFee(nTxBytes));
+    return std::max(minTxFee.GetFee(nTxBytes) + GetRabidcoinDustFee(tx.vout, discardThreshold), ::minRelayTxFeeRate.GetFee(nTxBytes));
 }
 
 CAmount CWallet::GetRequiredFee(unsigned int nTxBytes)
@@ -2931,7 +2931,7 @@ CAmount CWallet::GetDogecoinPriorityFee(const CMutableTransaction& tx, unsigned 
     CAmount nFeeNeeded = targetFee;
     // User didn't set: use -txconfirmtarget to estimate...
     if (nFeeNeeded == 0) {
-        nFeeNeeded = GetDogecoinFeeRate(nPriority).GetFee(nTxBytes);
+        nFeeNeeded = GetRabidcoinFeeRate(nPriority).GetFee(nTxBytes);
     }
     // prevent user from paying a fee below minRelayTxFee or minTxFee
     // Dogecoin: as we're adapting minTxFee to never be higher than

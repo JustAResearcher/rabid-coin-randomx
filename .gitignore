@@ -129,3 +129,13 @@ stage/
 *.iws
 *.iml
 *.ipr
+mine_genesis_tool*
+mine_final
+mine_regtest_genesis
+xmrig-rabid
+configure~
+src/univalue/configure~
+*.o
+*.lo
+*.a
+*.la

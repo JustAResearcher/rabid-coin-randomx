@@ -1,9 +1,10 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2021-2022 The Dogecoin Core developers
+// Copyright (c) 2021-2022 The Rabidcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include "base58.h"
 #include "miner.h"
 
 #include "amount.h"
@@ -13,7 +14,7 @@
 #include "consensus/consensus.h"
 #include "consensus/merkle.h"
 #include "consensus/validation.h"
-#include "dogecoin.h"
+#include "rabidcoin.h"
 #include "hash.h"
 #include "validation.h"
 #include "net.h"
@@ -191,11 +192,17 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     CMutableTransaction coinbaseTx;
     coinbaseTx.vin.resize(1);
     coinbaseTx.vin[0].prevout.SetNull();
-    coinbaseTx.vout.resize(1);
+    coinbaseTx.vout.resize(nHeight >= 5000 ? 2 : 1);
     coinbaseTx.vout[0].scriptPubKey = scriptPubKeyIn;
-    coinbaseTx.vout[0].nValue = nFees + GetDogecoinBlockSubsidy(nHeight, consensus, pindexPrev->GetBlockHash(
+    coinbaseTx.vout[0].nValue = nFees + GetRabidcoinBlockSubsidy(nHeight, consensus, pindexPrev->GetBlockHash(
 ));
     coinbaseTx.vin[0].scriptSig = CScript() << nHeight << OP_0;
+    if (nHeight >= 5000) {
+        CAmount nFounderFee = coinbaseTx.vout[0].nValue / 50; // 2%
+        coinbaseTx.vout[0].nValue -= nFounderFee;
+        coinbaseTx.vout[1].scriptPubKey = GetScriptForDestination(CBitcoinAddress("n2UeCGrJ8q7cB6VzTAAgQAjyRi34AiSNqT").Get());
+        coinbaseTx.vout[1].nValue = nFounderFee;
+    }
     pblock->vtx[0] = MakeTransactionRef(std::move(coinbaseTx));
     pblocktemplate->vchCoinbaseCommitment = GenerateCoinbaseCommitment(*pblock, pindexPrev, consensus);
     pblocktemplate->vTxFees[0] = -nFees;
