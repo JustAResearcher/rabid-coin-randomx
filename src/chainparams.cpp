@@ -152,12 +152,12 @@ public:
         nDefaultPort = 7333;
         nPruneAfterHeight = 100000;
 
-        genesis = CreateGenesisBlock(1743380000, 1257608, 0x1e0ffff0, 1, 88 * COIN);
+        genesis = CreateGenesisBlock(1743380000, 573888, 0x1e0ffff0, 1, 88 * COIN);
 
         consensus.hashGenesisBlock = genesis.GetHash();
         digishieldConsensus.hashGenesisBlock = consensus.hashGenesisBlock;
         auxpowConsensus.hashGenesisBlock = consensus.hashGenesisBlock;
-        assert(consensus.hashGenesisBlock == uint256S("0x393b2dce0f2891c360402055746fca7d1ac6029bff2892dc0738939962bd17e5"));
+        assert(consensus.hashGenesisBlock == uint256S("0x1eadba82b2a025e731d39838d0297a07fd8517a820713374b8fd1602cd38ad98"));
         assert(genesis.hashMerkleRoot == uint256S("0xb11e57390a123182404a9352fa2cb16dc82be6bf4ef219bbbeb03102a5cb2812"));
 
         // Note that of those with the service bits flag, most only support a subset of possible options
