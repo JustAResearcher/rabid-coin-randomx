@@ -18,7 +18,7 @@ RabidCoin is a community-driven cryptocurrency powered by the GhostRider proof-o
 | Parameter | Value |
 |-----------|-------|
 | Algorithm | GhostRider (15 sph hash functions) |
-| Block Reward | 88 RABID |
+| Block Reward | 10,000 RABID (fixed forever, no halvings) |
 | Founder Fee | 2% (block 5000+) |
 | P2P Port | 7333 |
 | RPC Port | 7332 |
