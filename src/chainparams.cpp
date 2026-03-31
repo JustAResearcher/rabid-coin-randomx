@@ -145,10 +145,10 @@ public:
          * The characters are rarely used upper ASCII, not valid as UTF-8, and produce
          * a large 32-bit integer with any alignment.
          */
-        pchMessageStart[0] = 0xc0;
-        pchMessageStart[1] = 0xc0;
-        pchMessageStart[2] = 0xc0;
-        pchMessageStart[3] = 0xc0;
+        pchMessageStart[0] = 0x52;
+        pchMessageStart[1] = 0x41;
+        pchMessageStart[2] = 0x42;
+        pchMessageStart[3] = 0x49;
         nDefaultPort = 7333;
         nPruneAfterHeight = 100000;
 
@@ -164,9 +164,9 @@ public:
         vSeeds.push_back(CDNSSeedData("multidoge.org", "seed.multidoge.org", true));
         vSeeds.push_back(CDNSSeedData("multidoge.org", "seed2.multidoge.org"));
 
-        base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,30);
-        base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,22);
-        base58Prefixes[SECRET_KEY] =     std::vector<unsigned char>(1,158);
+        base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,60);
+        base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,122);
+        base58Prefixes[SECRET_KEY] =     std::vector<unsigned char>(1,140);
         base58Prefixes[EXT_PUBLIC_KEY] = boost::assign::list_of(0x02)(0xfa)(0xca)(0xfd).convert_to_container<std::vector<unsigned char> >();
         base58Prefixes[EXT_SECRET_KEY] = boost::assign::list_of(0x02)(0xfa)(0xc3)(0x98).convert_to_container<std::vector<unsigned char> >();
 
