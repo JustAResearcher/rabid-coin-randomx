@@ -359,7 +359,7 @@ RES_FONTS = \
   qt/res/fonts/NotoSans-Medium.ttf \
   qt/res/fonts/NotoSans-Regular.ttf
 
-BITCOIN_RC = qt/res/bitcoin-qt-res.rc
+BITCOIN_RC = qt/res/rabidcoin-qt-res.rc
 
 BITCOIN_QT_INCLUDES = -I$(builddir)/qt -I$(srcdir)/qt -I$(srcdir)/qt/forms \
   -I$(builddir)/qt/forms -DQT_NO_KEYWORDS

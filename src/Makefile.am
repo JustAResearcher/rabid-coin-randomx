@@ -382,7 +382,7 @@ dogecoind_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
 dogecoind_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 dogecoind_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 if TARGET_WINDOWS
-dogecoind_SOURCES += bitcoind-res.rc
+dogecoind_SOURCES += rabidcoind-res.rc
 endif
 dogecoind_LDADD = \
   $(LIBDOGECOIN_SERVER) \
@@ -403,7 +403,7 @@ dogecoin_cli_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(EVENT_CFLAGS)
 dogecoin_cli_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 dogecoin_cli_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 if TARGET_WINDOWS
-dogecoin_cli_SOURCES += bitcoin-cli-res.rc
+dogecoin_cli_SOURCES += rabidcoin-cli-res.rc
 endif
 dogecoin_cli_LDADD = \
   $(LIBDOGECOIN_CLI) \
@@ -418,7 +418,7 @@ dogecoin_tx_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
 dogecoin_tx_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 dogecoin_tx_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 if TARGET_WINDOWS
-dogecoin_tx_SOURCES += bitcoin-tx-res.rc
+dogecoin_tx_SOURCES += rabidcoin-tx-res.rc
 endif
 dogecoin_tx_LDADD = \
   $(LIBUNIVALUE) \
