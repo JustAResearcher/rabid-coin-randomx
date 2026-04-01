@@ -42,7 +42,7 @@
 #define CURRENT_RELEASE_DATE "2024-08-03"
 
 /* Define to 1 to enable wallet functions */
-/* #undef ENABLE_WALLET */
+#define ENABLE_WALLET 1
 
 /* Define to 1 to enable ZMQ functions */
 #define ENABLE_ZMQ 1
@@ -396,10 +396,10 @@
 /* #undef USE_AVX2 */
 
 /* Define if dbus support should be compiled in */
-/* #undef USE_DBUS */
+#define USE_DBUS 1
 
 /* Define if QR support should be compiled in */
-/* #undef USE_QRCODE */
+#define USE_QRCODE 1
 
 /* Define this symbol if SSE2 works */
 /* #undef USE_SSE2 */

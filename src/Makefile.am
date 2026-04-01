@@ -53,7 +53,7 @@ noinst_PROGRAMS =
 TESTS =
 BENCHMARKS =
 if BUILD_BITCOIND
-  bin_PROGRAMS += dogecoind
+  bin_PROGRAMS += rabidcoind
 endif
 if BUILD_BITCOIN_UTILS
   bin_PROGRAMS += dogecoin-cli dogecoin-tx
@@ -377,14 +377,14 @@ libdogecoin_cli_a_SOURCES = \
 nodist_libdogecoin_util_a_SOURCES = $(srcdir)/obj/build.h
 #
 # bitcoind binary #
-dogecoind_SOURCES = rabidcoind.cpp
-dogecoind_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-dogecoind_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-dogecoind_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+rabidcoind_SOURCES = rabidcoind.cpp
+rabidcoind_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+rabidcoind_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+rabidcoind_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 if TARGET_WINDOWS
-dogecoind_SOURCES += rabidcoind-res.rc
+rabidcoind_SOURCES += rabidcoind-res.rc
 endif
-dogecoind_LDADD = \
+rabidcoind_LDADD = \
   $(LIBDOGECOIN_SERVER) \
   $(LIBDOGECOIN_COMMON) \
   $(LIBUNIVALUE) \
@@ -396,7 +396,7 @@ dogecoind_LDADD = \
   $(LIBLEVELDB) \
   $(LIBMEMENV) \
   $(LIBSECP256K1)
-dogecoind_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS)
+rabidcoind_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS)
 # bitcoin-cli binary #
 dogecoin_cli_SOURCES = rabidcoin-cli.cpp
 dogecoin_cli_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(EVENT_CFLAGS)

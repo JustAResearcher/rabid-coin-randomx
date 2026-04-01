@@ -1,6 +1,6 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2022 The Dogecoin Core developers
+// Copyright (c) 2022 The RabidCoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -490,7 +490,7 @@ fs::path GetDefaultDataDir()
     // Unix: ~/.bitcoin
 #ifdef WIN32
     // Windows
-    return GetSpecialFolderPath(CSIDL_APPDATA) / "Dogecoin";
+    return GetSpecialFolderPath(CSIDL_APPDATA) / "RabidCoin";
 #else
     fs::path pathRet;
     char* pszHome = getenv("HOME");
@@ -500,7 +500,7 @@ fs::path GetDefaultDataDir()
         pathRet = fs::path(pszHome);
 #ifdef MAC_OSX
     // Mac
-    return pathRet / "Library/Application Support/Dogecoin";
+    return pathRet / "Library/Application Support/RabidCoin";
 #else
     // Unix
     return pathRet / ".rabidcoin";

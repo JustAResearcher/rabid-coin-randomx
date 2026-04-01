@@ -1,5 +1,5 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2018-2022 The Dogecoin Core developers
+// Copyright (c) 2018-2022 The RabidCoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -45,11 +45,11 @@ QString BitcoinUnits::name(int unit)
 {
     switch(unit)
     {
-    case MBTC: return QString("MDOGE");
-    case kBTC: return QString("kDOGE");
+    case MBTC: return QString("MRABID");
+    case kBTC: return QString("kRABID");
     case BTC: return QString("RABID");
-    case mBTC: return QString("mDOGE");
-    case uBTC: return QString::fromUtf8("μDOGE");
+    case mBTC: return QString("mRABID");
+    case uBTC: return QString::fromUtf8("μRABID");
     default: return QString("???");
     }
 }
@@ -58,11 +58,11 @@ QString BitcoinUnits::description(int unit)
 {
     switch(unit)
     {
-    case MBTC: return QString("Mega-Dogecoins (1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
-    case kBTC: return QString("Kilo-Dogecoins (1" THIN_SP_UTF8 "000)");
-    case BTC: return QString("Dogecoins");
-    case mBTC: return QString("Milli-Dogecoins (1 / 1" THIN_SP_UTF8 "000)");
-    case uBTC: return QString("Micro-Dogecoins (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
+    case MBTC: return QString("Mega-RabidCoins (1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
+    case kBTC: return QString("Kilo-RabidCoins (1" THIN_SP_UTF8 "000)");
+    case BTC: return QString("RabidCoins");
+    case mBTC: return QString("Milli-RabidCoins (1 / 1" THIN_SP_UTF8 "000)");
+    case uBTC: return QString("Micro-RabidCoins (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
     default: return QString("???");
     }
 }
