@@ -96,3 +96,19 @@ RabidCoin uses the GhostRider algorithm. Use XMRig with GhostRider support:
 ## License
 
 RabidCoin Core is released under the terms of the MIT license. See [COPYING](COPYING) for more information.
+
+## Connecting to Testnet
+
+Create a `rabidcoin.conf` file in your data directory:
+```
+testnet=1
+addnode=194.163.150.15:17333
+listen=0
+```
+
+Or launch with flags:
+```
+rabidcoin-qt.exe -testnet -addnode=194.163.150.15:17333 -listen=0
+```
+
+Testnet seed node: 194.163.150.15:17333
