@@ -139,3 +139,9 @@ src/univalue/configure~
 *.lo
 *.a
 *.la
+src/rabidcoind
+src/qt/rabidcoin-qt
+mine_genesis_v5
+verify_genesis
+mine_testnet_genesis
+mine_regtest_genesis
