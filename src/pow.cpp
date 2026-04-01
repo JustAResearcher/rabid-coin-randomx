@@ -47,7 +47,7 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     }
 
     // Only change once per difficulty adjustment interval
-    bool fNewDifficultyProtocol = (pindexLast->nHeight >= 145000);
+    bool fNewDifficultyProtocol = params.fDigishieldDifficultyCalculation;
     const int64_t difficultyAdjustmentInterval = fNewDifficultyProtocol
                                                  ? 1
                                                  : params.DifficultyAdjustmentInterval();
