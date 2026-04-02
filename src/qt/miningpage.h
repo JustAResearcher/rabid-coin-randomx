@@ -6,7 +6,7 @@
 #include <QTimer>
 
 namespace Ui {
-    class MiningPage;
+class MiningPage;
 }
 
 class MiningPage : public QWidget
@@ -22,16 +22,21 @@ private Q_SLOTS:
     void stopMining();
     void startStratum();
     void stopStratum();
+    void startDaemon();
+    void stopDaemon();
     void updateStats();
-    void onThreadSliderChanged(int value);
     void onMinerOutput();
     void onStratumOutput();
+    void onDaemonOutput();
+    void onThreadSliderChanged(int value);
 
 private:
     Ui::MiningPage *ui;
     QProcess *minerProcess;
     QProcess *stratumProcess;
+    QProcess *daemonProcess;
     QTimer *statsTimer;
+    QString localIPStr;
     int acceptedShares;
     int connectedWorkers;
 };
