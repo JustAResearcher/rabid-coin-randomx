@@ -128,7 +128,7 @@ public:
         digishieldConsensus.fSimplifiedRewards = true;
         digishieldConsensus.fDigishieldDifficultyCalculation = true;
         digishieldConsensus.nPowTargetTimespan = 60; // post-digishield: 1 minute
-        digishieldConsensus.nCoinbaseMaturity = 240;
+        digishieldConsensus.nCoinbaseMaturity = 5;
 
         // Blocks 371337+ are AuxPoW
         auxpowConsensus = digishieldConsensus;
@@ -282,7 +282,7 @@ public:
         digishieldConsensus.fDigishieldDifficultyCalculation = true;
         digishieldConsensus.fSimplifiedRewards = true;
         digishieldConsensus.fPowAllowMinDifficultyBlocks = true;
-        digishieldConsensus.nCoinbaseMaturity = 240;
+        digishieldConsensus.nCoinbaseMaturity = 5;
 
         // Blocks 157500 - 158099 are Digishield with minimum difficulty on all blocks
         minDifficultyConsensus = digishieldConsensus;
