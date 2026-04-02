@@ -34,7 +34,9 @@
       <item row="0" column="1"><widget class="QLineEdit" name="stratumPort"><property name="text"><string>3333</string></property></widget></item>
       <item row="1" column="0"><widget class="QLabel"><property name="text"><string>Status:</string></property></widget></item>
       <item row="1" column="1"><widget class="QLabel" name="stratumStatus"><property name="text"><string>Stopped</string></property></widget></item>
-      <item row="2" column="1"><widget class="QPushButton" name="startStratumButton"><property name="text"><string>Start Stratum Server</string></property></widget></item>
+      <item row="2" column="0"><widget class="QLabel"><property name="text"><string>HiveOS Pool URL:</string></property></widget></item>
+      <item row="2" column="1"><widget class="QLabel" name="localIPLabel"><property name="text"><string>Detecting IP...</string></property></widget></item>
+      <item row="3" column="1"><widget class="QPushButton" name="startStratumButton"><property name="text"><string>Start Stratum Server</string></property></widget></item>
      </layout>
     </widget>
    </item>

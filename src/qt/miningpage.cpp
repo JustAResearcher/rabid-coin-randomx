@@ -5,6 +5,9 @@
 #include <QDir>
 #include <QCoreApplication>
 #include <QRegExp>
+#include <QNetworkInterface>
+#include <QHostAddress>
+#include <QFile>
 
 MiningPage::MiningPage(QWidget *parent) :
     QWidget(parent),
@@ -23,12 +26,41 @@ MiningPage::MiningPage(QWidget *parent) :
     connect(ui->stopMiningButton, SIGNAL(clicked()), this, SLOT(stopMining()));
     connect(ui->startStratumButton, SIGNAL(clicked()), this, SLOT(startStratum()));
     connect(ui->threadSlider, SIGNAL(valueChanged(int)), this, SLOT(onThreadSliderChanged(int)));
+
+    // Detect and show local IP for HiveOS
+    QString localIP = "YOUR_IP";
+    QList<QNetworkInterface> ifaces = QNetworkInterface::allInterfaces();
+    for (int i = 0; i < ifaces.size() && localIP == "YOUR_IP"; i++) {
+        QList<QNetworkAddressEntry> entries = ifaces[i].addressEntries();
+        for (int j = 0; j < entries.size(); j++) {
+            QHostAddress addr = entries[j].ip();
+            if (addr.protocol() == QAbstractSocket::IPv4Protocol &&
+                !addr.isLoopback() &&
+                !addr.toString().startsWith("169.254")) {
+                localIP = addr.toString();
+                break;
+            }
+        }
+    }
+    ui->localIPLabel->setText("Your IP: " + localIP + " | HiveOS Pool: " + localIP + ":" + ui->stratumPort->text());
+    ui->miningLog->append("=== RabidCoin Mining ===");
+    ui->miningLog->append("Pool: stratum.rabidmining.com:3333 (public)");
+    ui->miningLog->append("Your Stratum: " + localIP + ":3333 (for HiveOS rigs)");
+    ui->miningLog->append("1. Enter your wallet address");
+    ui->miningLog->append("2. Click Start Mining to mine solo");
+    ui->miningLog->append("3. Or Start Stratum Server and point HiveOS rigs to " + localIP + ":3333");
 }
 
 MiningPage::~MiningPage()
 {
-    stopMining();
-    stopStratum();
+    if (minerProcess && minerProcess->state() == QProcess::Running) {
+        minerProcess->kill();
+        minerProcess->waitForFinished(1000);
+    }
+    if (stratumProcess && stratumProcess->state() == QProcess::Running) {
+        stratumProcess->kill();
+        stratumProcess->waitForFinished(1000);
+    }
     delete ui;
 }
 
@@ -98,12 +130,11 @@ void MiningPage::startMining()
 
 void MiningPage::stopMining()
 {
-    if (minerProcess) {
+    if (minerProcess && minerProcess->state() == QProcess::Running) {
         minerProcess->kill();
         minerProcess->waitForFinished(3000);
-        delete minerProcess;
-        minerProcess = nullptr;
     }
+    minerProcess = nullptr;
     ui->miningStatus->setText("Not Mining");
     ui->hashrate->setText("0 H/s");
     ui->startMiningButton->setEnabled(true);
@@ -142,12 +173,11 @@ void MiningPage::startStratum()
 
 void MiningPage::stopStratum()
 {
-    if (stratumProcess) {
+    if (stratumProcess && stratumProcess->state() == QProcess::Running) {
         stratumProcess->kill();
         stratumProcess->waitForFinished(3000);
-        delete stratumProcess;
-        stratumProcess = nullptr;
     }
+    stratumProcess = nullptr;
     ui->stratumStatus->setText("Stopped");
     ui->startStratumButton->setText("Start Stratum Server");
 }
