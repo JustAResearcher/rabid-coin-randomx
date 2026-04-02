@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MiningPage</class>
+ <widget class="QWidget" name="MiningPage">
+  <property name="geometry">
+   <rect><x>0</x><y>0</y><width>800</width><height>600</height></rect>
+  </property>
+  <layout class="QVBoxLayout">
+   <item>
+    <widget class="QGroupBox" name="groupMining">
+     <property name="title"><string>Mining Settings</string></property>
+     <layout class="QFormLayout">
+      <item row="0" column="0"><widget class="QLabel"><property name="text"><string>Pool Address:</string></property></widget></item>
+      <item row="0" column="1"><widget class="QLineEdit" name="poolAddress"><property name="text"><string>stratum.rabidmining.com:3333</string></property></widget></item>
+      <item row="1" column="0"><widget class="QLabel"><property name="text"><string>Wallet Address:</string></property></widget></item>
+      <item row="1" column="1"><widget class="QLineEdit" name="walletAddress"/></item>
+      <item row="2" column="0"><widget class="QLabel"><property name="text"><string>Worker Name:</string></property></widget></item>
+      <item row="2" column="1"><widget class="QLineEdit" name="workerName"><property name="text"><string>worker1</string></property></widget></item>
+      <item row="3" column="0"><widget class="QLabel"><property name="text"><string>Threads:</string></property></widget></item>
+      <item row="3" column="1">
+       <layout class="QHBoxLayout">
+        <item><widget class="QSlider" name="threadSlider"><property name="orientation"><enum>Qt::Horizontal</enum></property><property name="minimum"><number>1</number></property><property name="maximum"><number>32</number></property><property name="value"><number>4</number></property></widget></item>
+        <item><widget class="QLabel" name="threadCount"><property name="text"><string>4</string></property></widget></item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupStratum">
+     <property name="title"><string>Built-in Stratum Server (for HiveOS rigs)</string></property>
+     <layout class="QFormLayout">
+      <item row="0" column="0"><widget class="QLabel"><property name="text"><string>Stratum Port:</string></property></widget></item>
+      <item row="0" column="1"><widget class="QLineEdit" name="stratumPort"><property name="text"><string>3333</string></property></widget></item>
+      <item row="1" column="0"><widget class="QLabel"><property name="text"><string>Status:</string></property></widget></item>
+      <item row="1" column="1"><widget class="QLabel" name="stratumStatus"><property name="text"><string>Stopped</string></property></widget></item>
+      <item row="2" column="1"><widget class="QPushButton" name="startStratumButton"><property name="text"><string>Start Stratum Server</string></property></widget></item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupStats">
+     <property name="title"><string>Mining Statistics</string></property>
+     <layout class="QFormLayout">
+      <item row="0" column="0"><widget class="QLabel"><property name="text"><string>Status:</string></property></widget></item>
+      <item row="0" column="1"><widget class="QLabel" name="miningStatus"><property name="text"><string>Not Mining</string></property></widget></item>
+      <item row="1" column="0"><widget class="QLabel"><property name="text"><string>Hashrate:</string></property></widget></item>
+      <item row="1" column="1"><widget class="QLabel" name="hashrate"><property name="text"><string>0 H/s</string></property></widget></item>
+      <item row="2" column="0"><widget class="QLabel"><property name="text"><string>Accepted Shares:</string></property></widget></item>
+      <item row="2" column="1"><widget class="QLabel" name="acceptedShares"><property name="text"><string>0</string></property></widget></item>
+      <item row="3" column="0"><widget class="QLabel"><property name="text"><string>Connected Workers:</string></property></widget></item>
+      <item row="3" column="1"><widget class="QLabel" name="connectedWorkers"><property name="text"><string>0</string></property></widget></item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout">
+     <item><widget class="QPushButton" name="startMiningButton"><property name="text"><string>Start Mining</string></property></widget></item>
+     <item><widget class="QPushButton" name="stopMiningButton"><property name="text"><string>Stop Mining</string></property><property name="enabled"><bool>false</bool></property></widget></item>
+    </layout>
+   </item>
+   <item><widget class="QTextEdit" name="miningLog"><property name="readOnly"><bool>true</bool></property></widget></item>
+  </layout>
+ </widget>
+</ui>
