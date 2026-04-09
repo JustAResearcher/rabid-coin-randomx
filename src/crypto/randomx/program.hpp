@@ -29,9 +29,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
 #include <cstdint>
-#include "crypto/randomx/common.hpp"
-#include "crypto/randomx/instruction.hpp"
-#include "crypto/randomx/blake2/endian.h"
+#include <ostream>
+#include "common.hpp"
+#include "instruction.hpp"
+#include "blake2/endian.h"
 
 namespace randomx {
 
@@ -45,13 +46,23 @@ namespace randomx {
 		Instruction& operator()(int pc) {
 			return programBuffer[pc];
 		}
+		friend std::ostream& operator<<(std::ostream& os, const Program& p) {
+			p.print(os);
+			return os;
+		}
 		uint64_t getEntropy(int i) {
 			return load64(&entropyBuffer[i]);
 		}
-		uint32_t getSize() {
-			return RandomX_CurrentConfig.ProgramSize;
+		static uint32_t getSize(randomx_flags flags) {
+			return (flags & RANDOMX_FLAG_V2) ? RANDOMX_PROGRAM_SIZE_V2 : RANDOMX_PROGRAM_SIZE_V1;
 		}
 	private:
+		void print(std::ostream& os) const {
+			for (int i = 0; i < RANDOMX_PROGRAM_MAX_SIZE; ++i) {
+				auto instr = programBuffer[i];
+				os << instr;
+			}
+		}
 		uint64_t entropyBuffer[16];
 		Instruction programBuffer[RANDOMX_PROGRAM_MAX_SIZE];
 	};

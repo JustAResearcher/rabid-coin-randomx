@@ -255,6 +255,33 @@ crypto_libdogecoin_crypto_a_SOURCES = \
   crypto/sha1.h \
   crypto/sha256.cpp \
   crypto/gr_hash/gr_hash.cpp \
+  crypto/randomx_rabid/randomx_rabid.cpp \
+  crypto/randomx/jit_compiler_x86_static.S \
+  crypto/randomx/randomx.cpp \
+  crypto/randomx/reciprocal.c \
+  crypto/randomx/argon2_core.c \
+  crypto/randomx/argon2_ref.c \
+  crypto/randomx/argon2_avx2.c \
+  crypto/randomx/argon2_ssse3.c \
+  crypto/randomx/blake2/blake2b.c \
+  crypto/randomx/aes_hash.cpp \
+  crypto/randomx/allocator.cpp \
+  crypto/randomx/assembly_generator_x86.cpp \
+  crypto/randomx/blake2_generator.cpp \
+  crypto/randomx/bytecode_machine.cpp \
+  crypto/randomx/cpu.cpp \
+  crypto/randomx/dataset.cpp \
+  crypto/randomx/instruction.cpp \
+  crypto/randomx/instructions_portable.cpp \
+  crypto/randomx/jit_compiler_x86.cpp \
+  crypto/randomx/soft_aes.cpp \
+  crypto/randomx/superscalar.cpp \
+  crypto/randomx/virtual_machine.cpp \
+  crypto/randomx/vm_compiled.cpp \
+  crypto/randomx/vm_compiled_light.cpp \
+  crypto/randomx/vm_interpreted.cpp \
+  crypto/randomx/vm_interpreted_light.cpp \
+  crypto/randomx/virtual_memory.c \
   crypto/ghostrider/sph_blake.c \
   crypto/ghostrider/sph_bmw.c \
   crypto/ghostrider/sph_cubehash.c \
@@ -511,3 +538,5 @@ endif
 
 
 
+
+# AVX-512 optimised RandomX AES — compiled separately with required flags

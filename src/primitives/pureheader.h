@@ -69,6 +69,7 @@ public:
     uint256 GetHash() const;
 
     uint256 GetPoWHash() const;
+    uint256 GetPoWHash(uint32_t nHeight) const;
 
     int64_t GetBlockTime() const
     {

@@ -1,6 +1,5 @@
 	;# save VM register values
-	add rsp, 248
-	pop rcx
+	mov rcx, qword ptr [rsp+448]
 	mov qword ptr [rcx+0], r8
 	mov qword ptr [rcx+8], r9
 	mov qword ptr [rcx+16], r10

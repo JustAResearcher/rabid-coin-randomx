@@ -1,6 +1,6 @@
 /*
+Copyright (c) 2018-2019, tevador <tevador@gmail.com>
 Copyright (c) 2025 SChernykh   <https://github.com/SChernykh>
-Copyright (c) 2025 XMRig       <support@xmrig.com>
 
 All rights reserved.
 

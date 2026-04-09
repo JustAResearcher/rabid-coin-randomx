@@ -1,7 +1,5 @@
 /*
-Copyright (c) 2018-2020, tevador    <tevador@gmail.com>
-Copyright (c) 2019-2020, SChernykh  <https://github.com/SChernykh>
-Copyright (c) 2019-2020, XMRig      <https://github.com/xmrig>, <support@xmrig.com>
+Copyright (c) 2018-2019, tevador <tevador@gmail.com>
 
 All rights reserved.
 
@@ -28,53 +26,56 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "crypto/randomx/vm_compiled.hpp"
-#include "crypto/randomx/common.hpp"
-#include "crypto/rx/Profiler.h"
+#include "vm_compiled.hpp"
+#include "common.hpp"
 
 namespace randomx {
 
 	static_assert(sizeof(MemoryRegisters) == 2 * sizeof(addr_t) + sizeof(uintptr_t), "Invalid alignment of struct randomx::MemoryRegisters");
 	static_assert(sizeof(RegisterFile) == 256, "Invalid alignment of struct randomx::RegisterFile");
 
-	template<int softAes>
-	void CompiledVm<softAes>::setDataset(randomx_dataset* dataset) {
+	template<class Allocator, bool softAes, bool secureJit>
+	CompiledVm<Allocator, softAes, secureJit>::CompiledVm(randomx_flags flags) : VmBase<Allocator, softAes>(flags) {
+		if (!secureJit) {
+			compiler.enableAll(); //make JIT buffer both writable and executable
+		}
+		compiler.setFlags(flags);
+	}
+
+	template<class Allocator, bool softAes, bool secureJit>
+	void CompiledVm<Allocator, softAes, secureJit>::setDataset(randomx_dataset* dataset) {
 		datasetPtr = dataset;
 	}
 
-	template<int softAes>
-	void CompiledVm<softAes>::run(void* seed) {
-		PROFILE_SCOPE(RandomX_run);
-
-		compiler.prepare();
-		VmBase<softAes>::generateProgram(seed);
+	template<class Allocator, bool softAes, bool secureJit>
+	void CompiledVm<Allocator, softAes, secureJit>::run(void* seed) {
+		VmBase<Allocator, softAes>::generateProgram(seed);
 		randomx_vm::initialize();
-		compiler.generateProgram(program, config, randomx_vm::getFlags());
+		if (secureJit) {
+			compiler.enableWriting();
+		}
+		compiler.generateProgram(program, config);
+		if (secureJit) {
+			compiler.enableExecution();
+		}
 		mem.memory = datasetPtr->memory + datasetOffset;
 		execute();
 	}
 
-	template<int softAes>
-	void CompiledVm<softAes>::execute() {
-		PROFILE_SCOPE(RandomX_JIT_execute);
-
-#		if defined(XMRIG_ARM) || defined(XMRIG_RISCV)
+	template<class Allocator, bool softAes, bool secureJit>
+	void CompiledVm<Allocator, softAes, secureJit>::execute() {
+#if defined(__aarch64__) || defined(__riscv)
 		memcpy(reg.f, config.eMask, sizeof(config.eMask));
-#		endif
-
-		const uint8_t* p = mem.memory;
-
-		// dataset prefetch for the first iteration of the main loop
-		rx_prefetch_nta(p + (mem.ma & (RandomX_ConfigurationBase::DatasetBaseSize - 64)));
-
-		// dataset prefetch for the second iteration of the main loop (RandomX v2)
-		if (RandomX_CurrentConfig.Tweak_V2_PREFETCH) {
-			rx_prefetch_nta(p + (mem.mx & (RandomX_ConfigurationBase::DatasetBaseSize - 64)));
-		}
-
-		compiler.getProgramFunc()(reg, mem, scratchpad, RandomX_CurrentConfig.ProgramIterations);
+#endif
+		compiler.getProgramFunc()(reg, mem, scratchpad, RANDOMX_PROGRAM_ITERATIONS);
 	}
 
-	template class CompiledVm<false>;
-	template class CompiledVm<true>;
+	template class CompiledVm<AlignedAllocator<CacheLineSize>, false, false>;
+	template class CompiledVm<AlignedAllocator<CacheLineSize>, true, false>;
+	template class CompiledVm<LargePageAllocator, false, false>;
+	template class CompiledVm<LargePageAllocator, true, false>;
+	template class CompiledVm<AlignedAllocator<CacheLineSize>, false, true>;
+	template class CompiledVm<AlignedAllocator<CacheLineSize>, true, true>;
+	template class CompiledVm<LargePageAllocator, false, true>;
+	template class CompiledVm<LargePageAllocator, true, true>;
 }

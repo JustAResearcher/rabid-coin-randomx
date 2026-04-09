@@ -1,7 +1,6 @@
 /*
 Copyright (c) 2018-2020, tevador    <tevador@gmail.com>
-Copyright (c) 2019-2021, XMRig      <https://github.com/xmrig>, <support@xmrig.com>
-Copyright (c) 2025, SChernykh       <https://github.com/SChernykh>
+Copyright (c) 2025-2026, SChernykh  <https://github.com/SChernykh>
 
 All rights reserved.
 
@@ -32,6 +31,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <cstdint>
 #include <cstdlib>
+#include <vector>
+
+#include "common.hpp"
 
 namespace randomx {
 
@@ -39,7 +41,7 @@ class SuperscalarProgram;
 struct ProgramConfiguration;
 class Program;
 
-void* generateDatasetInitVectorRV64(uint8_t* buf, SuperscalarProgram* programs, size_t num_programs);
-void* generateProgramVectorRV64(uint8_t* buf, Program& prog, ProgramConfiguration& pcfg, const uint8_t (&inst_map)[256], void* entryDataInitScalar, uint32_t datasetOffset);
+void* generateDatasetInitVectorRV64(uint8_t* buf, SuperscalarProgramList &programs, std::vector<uint64_t>& reciprocalCache);
+void* generateProgramVectorRV64(uint8_t* buf, Program& prog, ProgramConfiguration& pcfg, const uint8_t (&inst_map)[256], void* entryDataInitScalar, uint32_t datasetOffset, randomx_flags flags);
 
 } // namespace randomx

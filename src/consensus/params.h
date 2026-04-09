@@ -83,6 +83,7 @@ struct Params {
 
     /** Height-aware consensus parameters */
     uint32_t nHeightEffective; // When these parameters come into use
+    uint32_t nRandomXV2Height; // Block height at which RandomXv2 algo activates (0 = disabled)
     struct Params *pLeft = nullptr;      // Left hand branch
     struct Params *pRight = nullptr;     // Right hand branch
     const Consensus::Params *GetConsensus(uint32_t nTargetHeight) const;

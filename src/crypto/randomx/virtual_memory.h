@@ -26,33 +26,23 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <stdexcept>
+#pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "crypto/common/VirtualMemory.h"
-#include "crypto/randomx/virtual_memory.hpp"
+#include <stddef.h>
 
+#define alignSize(pos, align) (((pos - 1) / align + 1) * align)
 
-void* allocExecutableMemory(std::size_t bytes, bool hugePages) {
-    void *mem = xmrig::VirtualMemory::allocateExecutableMemory(bytes, hugePages);
-    if (mem == nullptr) {
-        throw std::runtime_error("Failed to allocate executable memory");
-    }
+void* allocMemoryPages(size_t);
+void setPagesRW(void*, size_t);
+void setPagesRX(void*, size_t);
+void setPagesRWX(void*, size_t);
+void* allocLargePagesMemory(size_t);
+void freePagedMemory(void*, size_t);
 
-    return mem;
+#ifdef __cplusplus
 }
-
-
-void* allocLargePagesMemory(std::size_t bytes) {
-    void *mem = xmrig::VirtualMemory::allocateLargePagesMemory(bytes);
-    if (mem == nullptr) {
-        throw std::runtime_error("Failed to allocate large pages memory");
-    }
-
-    return mem;
-}
-
-
-void freePagedMemory(void* ptr, std::size_t bytes) {
-    xmrig::VirtualMemory::freeLargePagesMemory(ptr, bytes);
-}
+#endif

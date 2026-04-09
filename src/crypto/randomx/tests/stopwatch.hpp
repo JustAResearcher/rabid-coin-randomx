@@ -1,7 +1,5 @@
 /*
- * Copyright 2018-2019, tevador    <tevador@gmail.com>
- * Copyright 2018-2020, SChernykh  <https://github.com/SChernykh>
- * Copyright 2016-2020 XMRig       <https://github.com/xmrig>, <support@xmrig.com>
+Copyright (c) 2018-2019, tevador <tevador@gmail.com>
 
 All rights reserved.
 
@@ -28,12 +26,59 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#pragma once
 
-void randomx_set_huge_pages_jit(bool)
-{
-}
+#include <chrono>
+#include <cstdint>
 
+class Stopwatch {
+public:
+	Stopwatch(bool startNow = false) {
+		reset();
+		if (startNow) {
+			start();
+		}
+	}
+	void reset() {
+		isRunning = false;
+		elapsed = 0;
+	}
+	void start() {
+		if (!isRunning) {
+			startMark = std::chrono::high_resolution_clock::now();
+			isRunning = true;
+		}
+	}
+	void restart() {
+		startMark = std::chrono::high_resolution_clock::now();
+		isRunning = true;
+		elapsed = 0;
+	}
+	void stop() {
+		if (isRunning) {
+			chrono_t endMark = std::chrono::high_resolution_clock::now();
+			uint64_t ns = std::chrono::duration_cast<sw_unit>(endMark - startMark).count();
+			elapsed += ns;
+			isRunning = false;
+		}
+	}
+	double getElapsed() const {
+		return getElapsedNanosec() / 1e+9;
+	}
+private:
+	using chrono_t = std::chrono::high_resolution_clock::time_point;
+	using sw_unit = std::chrono::nanoseconds;
+	chrono_t startMark;
+	uint64_t elapsed;
+	bool isRunning;
 
-void randomx_set_optimized_dataset_init(int)
-{
-}
+	uint64_t getElapsedNanosec() const {
+		uint64_t elns = elapsed;
+		if (isRunning) {
+			chrono_t endMark = std::chrono::high_resolution_clock::now();
+			uint64_t ns = std::chrono::duration_cast<sw_unit>(endMark - startMark).count();
+			elns += ns;
+		}
+		return elns;
+	}
+};

@@ -26,40 +26,47 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "crypto/randomx/vm_interpreted.hpp"
-#include "crypto/randomx/dataset.hpp"
-#include "crypto/randomx/intrin_portable.h"
-#include "crypto/randomx/reciprocal.h"
+#include <iostream>
+#include <iomanip>
+#include <stdexcept>
+#include <sstream>
+#include <cmath>
+#include <cfloat>
+#include "vm_interpreted.hpp"
+#include "dataset.hpp"
+#include "intrin_portable.h"
+#include "reciprocal.h"
+#include "soft_aes.h"
 
 namespace randomx {
 
-	template<int softAes>
-	void InterpretedVm<softAes>::setDataset(randomx_dataset* dataset) {
+	template<class Allocator, bool softAes>
+	void InterpretedVm<Allocator, softAes>::setDataset(randomx_dataset* dataset) {
 		datasetPtr = dataset;
 		mem.memory = dataset->memory;
 	}
 
-	template<int softAes>
-	void InterpretedVm<softAes>::run(void* seed) {
-		VmBase<softAes>::generateProgram(seed);
+	template<class Allocator, bool softAes>
+	void InterpretedVm<Allocator, softAes>::run(void* seed) {
+		VmBase<Allocator, softAes>::generateProgram(seed);
 		randomx_vm::initialize();
 		execute();
 	}
 
-	template<int softAes>
-	void InterpretedVm<softAes>::execute() {
+	template<class Allocator, bool softAes>
+	void InterpretedVm<Allocator, softAes>::execute() {
 
 		NativeRegisterFile nreg;
 
 		for(unsigned i = 0; i < RegisterCountFlt; ++i)
 			nreg.a[i] = rx_load_vec_f128(&reg.a[i].lo);
 
-		compileProgram(program, bytecode, nreg);
+		compileProgram(program, bytecode, nreg, randomx_vm::vmFlags);
 
 		uint32_t spAddr0 = mem.mx;
 		uint32_t spAddr1 = mem.ma;
 
-		for(unsigned ic = 0; ic < RandomX_CurrentConfig.ProgramIterations; ++ic) {
+		for(unsigned ic = 0; ic < RANDOMX_PROGRAM_ITERATIONS; ++ic) {
 			uint64_t spMix = nreg.r[config.readReg0] ^ nreg.r[config.readReg1];
 			spAddr0 ^= spMix;
 			spAddr0 &= ScratchpadL3Mask64;
@@ -75,11 +82,11 @@ namespace randomx {
 			for (unsigned i = 0; i < RegisterCountFlt; ++i)
 				nreg.e[i] = maskRegisterExponentMantissa(config, rx_cvt_packed_int_vec_f128(scratchpad + spAddr1 + 8 * (RegisterCountFlt + i)));
 
-			executeBytecode(bytecode, scratchpad, config);
+			executeBytecode(bytecode, scratchpad, config, randomx_vm::getFlags());
 
 			const uint64_t readPtr = datasetOffset + (mem.ma & CacheLineAlignMask);
 
-			auto& mp = RandomX_CurrentConfig.Tweak_V2_PREFETCH ? mem.ma : mem.mx;
+			auto& mp = (randomx_vm::getFlags() & RANDOMX_FLAG_V2) ? mem.ma : mem.mx;
 			mp ^= nreg.r[config.readReg2] ^ nreg.r[config.readReg3];
 
 			datasetPrefetch(datasetOffset + (mp & CacheLineAlignMask));
@@ -89,8 +96,29 @@ namespace randomx {
 			for (unsigned i = 0; i < RegistersCount; ++i)
 				store64(scratchpad + spAddr1 + 8 * i, nreg.r[i]);
 
-			for (unsigned i = 0; i < RegisterCountFlt; ++i)
-				nreg.f[i] = rx_xor_vec_f128(nreg.f[i], nreg.e[i]);
+			if (randomx_vm::getFlags() & RANDOMX_FLAG_V2) {
+				rx_vec_i128 ekey[RegisterCountFlt];
+				rx_vec_i128 freg[RegisterCountFlt];
+
+				for (unsigned i = 0; i < RegisterCountFlt; ++i) {
+					ekey[i] = rx_cast_vec_f2i(nreg.e[i]);
+					freg[i] = rx_cast_vec_f2i(nreg.f[i]);
+				}
+
+				for (unsigned i = 0; i < RegisterCountFlt; ++i) {
+					freg[0] = aesenc<softAes>(freg[0], ekey[i]);
+					freg[1] = aesdec<softAes>(freg[1], ekey[i]);
+					freg[2] = aesenc<softAes>(freg[2], ekey[i]);
+					freg[3] = aesdec<softAes>(freg[3], ekey[i]);
+				}
+
+				for (unsigned i = 0; i < RegisterCountFlt; ++i)
+					nreg.f[i] = rx_cast_vec_i2f(freg[i]);
+			}
+			else {
+				for (unsigned i = 0; i < RegisterCountFlt; ++i)
+					nreg.f[i] = rx_xor_vec_f128(nreg.f[i], nreg.e[i]);
+			}
 
 			for (unsigned i = 0; i < RegisterCountFlt; ++i)
 				rx_store_vec_f128((double*)(scratchpad + spAddr0 + 16 * i), nreg.f[i]);
@@ -107,22 +135,22 @@ namespace randomx {
 
 		for (unsigned i = 0; i < RegisterCountFlt; ++i)
 			rx_store_vec_f128(&reg.e[i].lo, nreg.e[i]);
-
-		cleanup();
 	}
 
-	template<int softAes>
-	void InterpretedVm<softAes>::datasetRead(uint64_t address, int_reg_t(&r)[RegistersCount]) {
+	template<class Allocator, bool softAes>
+	void InterpretedVm<Allocator, softAes>::datasetRead(uint64_t address, int_reg_t(&r)[RegistersCount]) {
 		uint64_t* datasetLine = (uint64_t*)(mem.memory + address);
 		for (int i = 0; i < RegistersCount; ++i)
 			r[i] ^= datasetLine[i];
 	}
 
-	template<int softAes>
-	void InterpretedVm<softAes>::datasetPrefetch(uint64_t address) {
+	template<class Allocator, bool softAes>
+	void InterpretedVm<Allocator, softAes>::datasetPrefetch(uint64_t address) {
 		rx_prefetch_nta(mem.memory + address);
 	}
 
-	template class InterpretedVm<false>;
-	template class InterpretedVm<true>;
+	template class InterpretedVm<AlignedAllocator<CacheLineSize>, false>;
+	template class InterpretedVm<AlignedAllocator<CacheLineSize>, true>;
+	template class InterpretedVm<LargePageAllocator, false>;
+	template class InterpretedVm<LargePageAllocator, true>;
 }

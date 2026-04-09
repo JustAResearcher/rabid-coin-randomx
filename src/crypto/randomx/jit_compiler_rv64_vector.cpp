@@ -1,7 +1,6 @@
 /*
-Copyright (c) 2018-2020, tevador    <tevador@gmail.com>
-Copyright (c) 2019-2021, XMRig      <https://github.com/xmrig>, <support@xmrig.com>
-Copyright (c) 2025, SChernykh       <https://github.com/SChernykh>
+Copyright (c) 2023, tevador    <tevador@gmail.com>
+Copyright (c) 2025-2026, SChernykh  <https://github.com/SChernykh>
 
 All rights reserved.
 
@@ -28,28 +27,37 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "crypto/randomx/configuration.h"
-#include "crypto/randomx/jit_compiler_rv64_vector.h"
-#include "crypto/randomx/jit_compiler_rv64_vector_static.h"
-#include "crypto/randomx/reciprocal.h"
-#include "crypto/randomx/superscalar.hpp"
-#include "crypto/randomx/program.hpp"
-#include "crypto/randomx/soft_aes.h"
-#include "backend/cpu/Cpu.h"
+#include "configuration.h"
+#include "jit_compiler_rv64_vector.h"
+#include "jit_compiler_rv64_vector_static.h"
+#include "reciprocal.h"
+#include "superscalar.hpp"
+#include "program.hpp"
+#include "soft_aes.h"
 
 namespace randomx {
+
+constexpr int maskLog2(uint32_t x, int prev) {
+	return x == 1 ? prev : maskLog2(x >> 1, prev + 1);
+}
+
+constexpr int MaskL1Shift = 32 - maskLog2(RANDOMX_SCRATCHPAD_L1, 0);
+constexpr int MaskL2Shift = 32 - maskLog2(RANDOMX_SCRATCHPAD_L2, 0);
+constexpr int MaskL3Shift = 32 - maskLog2(RANDOMX_SCRATCHPAD_L3, 0);
 
 #define ADDR(x) ((uint8_t*) &(x))
 #define DIST(x, y) (ADDR(y) - ADDR(x))
 
 #define JUMP(offset) (0x6F | (((offset) & 0x7FE) << 20) | (((offset) & 0x800) << 9) | ((offset) & 0xFF000))
 
-void* generateDatasetInitVectorRV64(uint8_t* buf, SuperscalarProgram* programs, size_t num_programs)
+void* generateDatasetInitVectorRV64(uint8_t* buf, SuperscalarProgramList &programs, std::vector<uint64_t>& reciprocalCache)
 {
 	uint8_t* p = buf + DIST(randomx_riscv64_vector_code_begin, randomx_riscv64_vector_sshash_generated_instructions);
 
 	uint8_t* literals = buf + DIST(randomx_riscv64_vector_code_begin, randomx_riscv64_vector_sshash_imul_rcp_literals);
 	uint8_t* cur_literal = literals;
+
+	const size_t num_programs = programs.size();
 
 	for (size_t i = 0; i < num_programs; ++i) {
 		// Step 4
@@ -177,7 +185,7 @@ void* generateDatasetInitVectorRV64(uint8_t* buf, SuperscalarProgram* programs, 
 						EMIT(0x7F878793);
 					}
 
-					const uint64_t r = randomx_reciprocal_fast(imm32);
+					const uint64_t r = reciprocalCache[imm32];
 					memcpy(cur_literal, &r, 8);
 					cur_literal += 8;
 
@@ -259,7 +267,7 @@ static void imm_to_x5(uint32_t imm, uint8_t*& p)
 static void loadFromScratchpad(uint32_t src, uint32_t dst, uint32_t mod, uint32_t imm, uint8_t*& p)
 {
 	if (src == dst) {
-		imm &= RandomX_CurrentConfig.ScratchpadL3Mask_Calculated;
+		imm &= RANDOMX_SCRATCHPAD_L3 - 8;
 
 		if (imm <= 2047) {
 			// ld x5, imm(x12)
@@ -283,15 +291,15 @@ static void loadFromScratchpad(uint32_t src, uint32_t dst, uint32_t mod, uint32_
 		return;
 	}
 
-	uint32_t shift = 32;
+	uint32_t shift;
 	uint32_t mask_reg;
 
 	if ((mod & 3) == 0) {
-		shift -= RandomX_CurrentConfig.Log2_ScratchpadL2;
+		shift = MaskL2Shift;
 		mask_reg = 17;
 	}
 	else {
-		shift -= RandomX_CurrentConfig.Log2_ScratchpadL1;
+		shift = MaskL1Shift;
 		mask_reg = 16;
 	}
 
@@ -316,23 +324,21 @@ static void loadFromScratchpad(uint32_t src, uint32_t dst, uint32_t mod, uint32_
 	emit32(0x0002B283);
 }
 
-void* generateProgramVectorRV64(uint8_t* buf, Program& prog, ProgramConfiguration& pcfg, const uint8_t (&inst_map)[256], void* entryDataInitScalar, uint32_t datasetOffset)
+void* generateProgramVectorRV64(uint8_t* buf, Program& prog, ProgramConfiguration& pcfg, const uint8_t (&inst_map)[256], void* entryDataInitScalar, uint32_t datasetOffset, randomx_flags flags)
 {
 	uint64_t* params = (uint64_t*)(buf + DIST(randomx_riscv64_vector_code_begin, randomx_riscv64_vector_program_params));
 
-	params[0] = RandomX_CurrentConfig.ScratchpadL1_Size - 8;
-	params[1] = RandomX_CurrentConfig.ScratchpadL2_Size - 8;
-	params[2] = RandomX_CurrentConfig.ScratchpadL3_Size - 8;
-	params[3] = RandomX_CurrentConfig.DatasetBaseSize - 64;
-	params[4] = (1 << RandomX_ConfigurationBase::JumpBits) - 1;
+	params[0] = RANDOMX_SCRATCHPAD_L1 - 8;
+	params[1] = RANDOMX_SCRATCHPAD_L2 - 8;
+	params[2] = RANDOMX_SCRATCHPAD_L3 - 8;
+	params[3] = RANDOMX_DATASET_BASE_SIZE - 64;
+	params[4] = (1 << RANDOMX_JUMP_BITS) - 1;
 
-	const bool hasAES = xmrig::Cpu::info()->hasAES();
-
-	if (RandomX_CurrentConfig.Tweak_V2_AES && !hasAES) {
-		params[5] = (uint64_t) &lutEnc[2][0];
-		params[6] = (uint64_t) &lutDec[2][0];
-		params[7] = (uint64_t) lutEncIndex;
-		params[8] = (uint64_t) lutDecIndex;
+	if ((flags & RANDOMX_FLAG_V2) && ((flags & RANDOMX_FLAG_HARD_AES) == 0)) {
+		params[5] = (uint64_t) &randomx_aes_lut_enc[2][0];
+		params[6] = (uint64_t) &randomx_aes_lut_dec[2][0];
+		params[7] = (uint64_t) randomx_aes_lut_enc_index;
+		params[8] = (uint64_t) randomx_aes_lut_dec_index;
 
 		uint32_t* p1 = (uint32_t*)(buf + DIST(randomx_riscv64_vector_code_begin, randomx_riscv64_vector_program_v2_soft_aes_init));
 
@@ -358,17 +364,17 @@ void* generateProgramVectorRV64(uint8_t* buf, Program& prog, ProgramConfiguratio
 	*spaddr_xor2			= 0x014A42B3 + (pcfg.readReg0 << 15) + (pcfg.readReg1 << 20);	// xor x5,  readReg0, readReg1
 	const uint32_t mx_xor_value	= 0x014A42B3 + (pcfg.readReg2 << 15) + (pcfg.readReg3 << 20);	// xor x5,  readReg2, readReg3
 
-	*mx_xor = mx_xor_value;
-	*mx_xor_light = mx_xor_value;
+	memcpy(mx_xor, &mx_xor_value, sizeof(mx_xor_value));
+	memcpy(mx_xor_light, &mx_xor_value, sizeof(mx_xor_value));
 
 	// "slli x5, x5, 32" for RandomX v2, "nop" for RandomX v1
-	const uint16_t mp_reg_value = RandomX_CurrentConfig.Tweak_V2_PREFETCH ? 0x1282 : 0x0001;
+	const uint16_t mp_reg_value = (flags & RANDOMX_FLAG_V2) ? 0x1282 : 0x0001;
 
 	memcpy(((uint8_t*)mx_xor) + 8, &mp_reg_value, sizeof(mp_reg_value));
 	memcpy(((uint8_t*)mx_xor_light) + 8, &mp_reg_value, sizeof(mp_reg_value));
 
 	// "srli x5, x14, 32" for RandomX v2, "srli x5, x14, 0" for RandomX v1
-	const uint32_t mp_reg_value2 = RandomX_CurrentConfig.Tweak_V2_PREFETCH ? 0x02075293 : 0x00075293;
+	const uint32_t mp_reg_value2 = (flags & RANDOMX_FLAG_V2) ? 0x02075293 : 0x00075293;
 	memcpy(((uint8_t*)mx_xor) + 14, &mp_reg_value2, sizeof(mp_reg_value2));
 
 	if (entryDataInitScalar) {
@@ -393,7 +399,7 @@ void* generateProgramVectorRV64(uint8_t* buf, Program& prog, ProgramConfiguratio
 
 	uint8_t* last_modified[RegistersCount] = { p, p, p, p, p, p, p, p };
 
-	for (uint32_t i = 0, n = prog.getSize(); i < n; ++i) {
+	for (uint32_t i = 0, n = prog.getSize(flags); i < n; ++i) {
 		Instruction instr = prog(i);
 
 		uint32_t src = instr.src % RegistersCount;
@@ -737,11 +743,11 @@ void* generateProgramVectorRV64(uint8_t* buf, Program& prog, ProgramConfiguratio
 
 		case InstructionType::CBRANCH:
 			{
-				const uint32_t shift = (mod >> 4) + RandomX_ConfigurationBase::JumpOffset;
+				const uint32_t shift = (mod >> 4) + RANDOMX_JUMP_OFFSET;
 
 				imm |= (1UL << shift);
 
-				if (RandomX_ConfigurationBase::JumpOffset > 0 || shift > 0) {
+				if (RANDOMX_JUMP_OFFSET > 0 || shift > 0) {
 					imm &= ~(1UL << (shift - 1));
 				}
 
@@ -793,7 +799,7 @@ void* generateProgramVectorRV64(uint8_t* buf, Program& prog, ProgramConfiguratio
 				emit32(0x0062E2B3);
 #endif // __riscv_zbb
 
-				if (RandomX_CurrentConfig.Tweak_V2_CFROUND) {
+				if (flags & RANDOMX_FLAG_V2) {
 					// andi x6, x5, 120
 					emit32(0x0782F313);
 					// bnez x6, +24
@@ -804,7 +810,7 @@ void* generateProgramVectorRV64(uint8_t* buf, Program& prog, ProgramConfiguratio
 				emit32(0x0062F293);
 			}
 			else {
-				if (RandomX_CurrentConfig.Tweak_V2_CFROUND) {
+				if (flags & RANDOMX_FLAG_V2) {
 					// andi x6, x20 + src, 120
 					emit32(0x078A7313 + (src << 15));
 					// bnez x6, +24
@@ -829,19 +835,19 @@ void* generateProgramVectorRV64(uint8_t* buf, Program& prog, ProgramConfiguratio
 		case InstructionType::ISTORE:
 			{
 				uint32_t mask_reg;
-				uint32_t shift = 32;
+				uint32_t shift;
 
 				if ((mod >> 4) >= 14) {
-					shift -= RandomX_CurrentConfig.Log2_ScratchpadL3;
+					shift = MaskL3Shift;
 					mask_reg = 1; // x1 = L3 mask
 				}
 				else {
 					if ((mod & 3) == 0) {
-						shift -= RandomX_CurrentConfig.Log2_ScratchpadL2;
+						shift = MaskL2Shift;
 						mask_reg = 17; // x17 = L2 mask
 					}
 					else {
-						shift -= RandomX_CurrentConfig.Log2_ScratchpadL1;
+						shift = MaskL1Shift;
 						mask_reg = 16; // x16 = L1 mask
 					}
 				}
@@ -881,10 +887,10 @@ void* generateProgramVectorRV64(uint8_t* buf, Program& prog, ProgramConfiguratio
 
 	emit32(JUMP(e - p));
 
-	if (RandomX_CurrentConfig.Tweak_V2_AES) {
+	if (flags & RANDOMX_FLAG_V2) {
 		uint32_t* p1 = (uint32_t*)(buf + DIST(randomx_riscv64_vector_code_begin, randomx_riscv64_vector_program_main_loop_fe_mix));
 
-		if (hasAES) {
+		if (flags & RANDOMX_FLAG_HARD_AES) {
 			// Restore vsetivli zero, 4, e32, m1, ta, ma
 			*p1 = 0xCD027057;
 		}
