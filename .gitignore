@@ -145,3 +145,14 @@ mine_genesis_v5
 verify_genesis
 mine_testnet_genesis
 mine_regtest_genesis
+src/qt/st*
+src/rabidcoind
+src/rabidcoin-cli
+src/rabidcoin-tx
+src/qt/rabidcoin-qt
+src/qt/rabidcoin-qt.exe
+src/rabidcoind.exe
+src/*.o
+src/**/*.o
+src/*.a
+src/**/*.a

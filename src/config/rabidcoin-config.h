@@ -348,10 +348,10 @@
 #define PACKAGE_BUGREPORT "https://github.com/rabidcoin/rabidcoin/issues"
 
 /* Define to the full name of this package. */
-#define PACKAGE_NAME "Rabidcoin Core"
+#define PACKAGE_NAME "RabidCoin Core"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "Rabidcoin Core 1.14.99"
+#define PACKAGE_STRING "RabidCoin Core 1.14.99"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "rabidcoin"

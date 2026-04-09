@@ -200,7 +200,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     if (nHeight >= 5000) {
         CAmount nFounderFee = coinbaseTx.vout[0].nValue / 50; // 2%
         coinbaseTx.vout[0].nValue -= nFounderFee;
-        coinbaseTx.vout[1].scriptPubKey = GetScriptForDestination(CBitcoinAddress("RL7yJPhkxFtvaB2dgJzCdvey59C84PMQwb").Get());
+        coinbaseTx.vout[1].scriptPubKey = GetScriptForDestination(CBitcoinAddress("neZq4JxrsC2H8CVprngCazESVN86GBpsY3").Get());
         coinbaseTx.vout[1].nValue = nFounderFee;
     }
     pblock->vtx[0] = MakeTransactionRef(std::move(coinbaseTx));
