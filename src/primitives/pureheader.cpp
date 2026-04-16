@@ -23,17 +23,8 @@ uint256 CPureBlockHeader::GetPoWHash() const
     return GhostriderHash(pbegin, 80);
 }
 
-// Height-aware PoW hash — switches to RandomXv2 at nRandomXV2Height
-#include "crypto/randomx_rabid/randomx_rabid.h"
 
 uint256 CPureBlockHeader::GetPoWHash(uint32_t nHeight) const
 {
-    const Consensus::Params& params = Params().GetConsensus(nHeight);
-    if (params.nRandomXV2Height > 0 && nHeight >= params.nRandomXV2Height) {
-        const uint8_t* pbegin = (const uint8_t*)BEGIN(nVersion);
-        return RandomXV2Hash(nHeight, pbegin, 80);
-    }
-    // Pre-fork: GhostRider
-    const uint8_t* pbegin = (const uint8_t*)BEGIN(nVersion);
-    return GhostriderHash(pbegin, 80);
+    return GetPoWHash();
 }

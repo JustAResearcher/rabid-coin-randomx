@@ -228,7 +228,6 @@ public:
 
         // Blocks 0 - 144999 are pre-Digishield
         consensus.nHeightEffective = 0;
-        consensus.nRandomXV2Height = 8000; // RandomXv2 fork block
         consensus.nPowTargetTimespan = 4 * 60 * 60; // pre-digishield: 4 hours
         consensus.fDigishieldDifficultyCalculation = false;
         consensus.nCoinbaseMaturity = 30;
