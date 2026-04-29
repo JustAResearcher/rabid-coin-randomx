@@ -7,8 +7,16 @@ STRATUM_PORT = 3333
 COINBASE_ADDR = "nprxq6xT3kMdHiv8HXGvrPis33kxtUkxBy"
 
 def rpc(method, params=[]):
+    import base64
+    from urllib.parse import urlparse
+    parsed = urlparse(RPC_URL)
+    base_url = f"http://{parsed.hostname}:{parsed.port}"
+    credentials = base64.b64encode(f"{parsed.username}:{parsed.password}".encode()).decode()
     data = json.dumps({"jsonrpc":"1.0","id":"1","method":method,"params":params}).encode()
-    req = urllib.request.Request(RPC_URL, data=data, headers={"Content-Type": "application/json"})
+    req = urllib.request.Request(base_url, data=data, headers={
+        "Content-Type": "application/json",
+        "Authorization": f"Basic {credentials}"
+    })
     with urllib.request.urlopen(req, timeout=10) as r:
         return json.loads(r.read().decode())
 
