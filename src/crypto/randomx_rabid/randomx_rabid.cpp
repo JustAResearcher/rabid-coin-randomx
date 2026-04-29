@@ -58,7 +58,11 @@ static void MakeSeedKey(uint32_t epoch, uint8_t key[4])
 void RandomXV2_InitCache(uint32_t nHeight)
 {
     uint32_t epoch = KeyEpoch(nHeight);
-    LOCK_GUARD lock;
+    #ifdef WIN32
+    WinLockGuard _win_lock;
+#else
+    std::lock_guard<std::mutex> lock(s_mutex);
+#endif
 
     if (epoch == s_currentEpoch && s_vm != nullptr)
         return;
@@ -102,7 +106,11 @@ uint256 RandomXV2Hash(uint32_t nHeight, const uint8_t* input, size_t len)
     RandomXV2_InitCache(nHeight);
 
     uint256 result;
-    LOCK_GUARD lock;
+    #ifdef WIN32
+    WinLockGuard _win_lock;
+#else
+    std::lock_guard<std::mutex> lock(s_mutex);
+#endif
     randomx_calculate_hash(s_vm, input, len, result.begin());
     return result;
 }
