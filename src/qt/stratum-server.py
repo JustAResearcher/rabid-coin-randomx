@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import socket, json, threading, requests, hashlib, struct, time, binascii, os
+import socket, json, threading, hashlib, struct, time, binascii, os, urllib.request
 import calendar
 
 RPC_URL = "http://rabiduser:rabidpass123@127.0.0.1:17332"
@@ -7,8 +7,10 @@ STRATUM_PORT = 3333
 COINBASE_ADDR = "nprxq6xT3kMdHiv8HXGvrPis33kxtUkxBy"
 
 def rpc(method, params=[]):
-    r = requests.post(RPC_URL, json={"jsonrpc":"1.0","id":"1","method":method,"params":params}, timeout=10)
-    return r.json()
+    data = json.dumps({"jsonrpc":"1.0","id":"1","method":method,"params":params}).encode()
+    req = urllib.request.Request(RPC_URL, data=data, headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=10) as r:
+        return json.loads(r.read().decode())
 
 def dsha256(data):
     return hashlib.sha256(hashlib.sha256(data).digest()).digest()

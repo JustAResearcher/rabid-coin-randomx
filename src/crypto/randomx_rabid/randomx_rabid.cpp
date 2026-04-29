@@ -8,7 +8,25 @@
 #include "randomx_rabid.h"
 #include "crypto/randomx/randomx.h"
 
+#ifdef WIN32
+#include <windows.h>
+static CRITICAL_SECTION s_cs;
+static bool s_cs_init = false;
+struct WinMutex {
+    WinMutex() { if(!s_cs_init){InitializeCriticalSection(&s_cs);s_cs_init=true;} }
+};
+static WinMutex s_mutex_init;
+struct WinLockGuard {
+    WinLockGuard() { EnterCriticalSection(&s_cs); }
+    ~WinLockGuard() { LeaveCriticalSection(&s_cs); }
+};
+#define MUTEX_TYPE int
+#define LOCK_GUARD WinLockGuard
+#else
 #include <mutex>
+#define MUTEX_TYPE std::mutex
+#define LOCK_GUARD std::lock_guard<std::mutex>
+#endif
 #include <stdexcept>
 #include <cstring>
 
@@ -19,7 +37,9 @@ static uint32_t         s_currentEpoch = UINT32_MAX;
 static randomx_cache*   s_cache        = nullptr;
 static randomx_dataset* s_dataset      = nullptr;
 static randomx_vm*      s_vm           = nullptr;
+#ifndef WIN32
 static std::mutex       s_mutex;
+#endif
 
 static uint32_t KeyEpoch(uint32_t height)
 {
@@ -38,7 +58,7 @@ static void MakeSeedKey(uint32_t epoch, uint8_t key[4])
 void RandomXV2_InitCache(uint32_t nHeight)
 {
     uint32_t epoch = KeyEpoch(nHeight);
-    std::lock_guard<std::mutex> lock(s_mutex);
+    LOCK_GUARD lock;
 
     if (epoch == s_currentEpoch && s_vm != nullptr)
         return;
@@ -82,7 +102,7 @@ uint256 RandomXV2Hash(uint32_t nHeight, const uint8_t* input, size_t len)
     RandomXV2_InitCache(nHeight);
 
     uint256 result;
-    std::lock_guard<std::mutex> lock(s_mutex);
+    LOCK_GUARD lock;
     randomx_calculate_hash(s_vm, input, len, result.begin());
     return result;
 }
