@@ -86,7 +86,7 @@ unsigned int CalculateRabidcoinNextWorkRequired(const CBlockIndex* pindexLast, i
     return bnNew.GetCompact();
 }
 
-bool CheckAuxPowProofOfWork(const CBlockHeader& block, const Consensus::Params& params)
+bool CheckAuxPowProofOfWork(const CBlockHeader& block, const Consensus::Params& params, int nHeight)
 {
     /* Except for legacy blocks with full version 1, ensure that
        the chain ID is correct.  Legacy blocks are not allowed since
@@ -104,9 +104,17 @@ bool CheckAuxPowProofOfWork(const CBlockHeader& block, const Consensus::Params& 
             return error("%s : no auxpow on block with auxpow version",
                          __func__);
 
-        // TODO(randomx): thread block height here for correct RX epoch
-        if (!CheckProofOfWork(block.GetPoWHash(), block.nBits, params))
-            return error("%s : non-AUX proof of work failed", __func__);
+        // Non-auxpow PoW depends on height (GhostRider pre-activation,
+        // RandomXv2 post-activation). When height is unknown (e.g. peer
+        // header sync before pindexPrev lookup), defer the check to the
+        // contextual caller (ContextualCheckBlockHeader). Without this
+        // guard, pre-context CheckBlockHeader would unconditionally call
+        // the no-arg GetPoWHash() -> GhostRider, which would reject every
+        // valid RandomXv2-mined block post-activation.
+        if (nHeight >= 0) {
+            if (!CheckProofOfWork(block.GetPoWHash((uint32_t)nHeight), block.nBits, params))
+                return error("%s : non-AUX proof of work failed", __func__);
+        }
 
         return true;
     }

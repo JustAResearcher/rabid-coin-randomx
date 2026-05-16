@@ -12,10 +12,15 @@ unsigned int CalculateRabidcoinNextWorkRequired(const CBlockIndex* pindexLast, i
 
 /**
  * Check proof-of-work of a block header, taking auxpow into account.
- * @param block The block header.
- * @param params Consensus parameters.
+ * @param block   The block header.
+ * @param params  Consensus parameters.
+ * @param nHeight Block height (used to pick GhostRider vs RandomXv2). Pass
+ *                -1 (default) for pre-context calls. With -1, the non-auxpow
+ *                hash check is skipped and must be redone by a contextual
+ *                caller (ContextualCheckBlockHeader). Auxpow checks still
+ *                run regardless since they don't depend on this chain's algo.
  * @return True iff the PoW is correct.
  */
-bool CheckAuxPowProofOfWork(const CBlockHeader& block, const Consensus::Params& params);
+bool CheckAuxPowProofOfWork(const CBlockHeader& block, const Consensus::Params& params, int nHeight = -1);
 
 

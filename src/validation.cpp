@@ -3062,7 +3062,7 @@ std::vector<unsigned char> GenerateCoinbaseCommitment(CBlock& block, const CBloc
     return commitment;
 }
 
-bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& state, const CBlockIndex* pindexPrev, int64_t nAdjustedTime)
+bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& state, const CBlockIndex* pindexPrev, int64_t nAdjustedTime, bool fCheckPOW)
 {
     const int nHeight = pindexPrev == NULL ? 0 : pindexPrev->nHeight + 1;
     const CChainParams& params = Params();
@@ -3100,6 +3100,15 @@ bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& sta
     // Check proof of work
     if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams))
         return state.DoS(100, false, REJECT_INVALID, "bad-diffbits", false, "incorrect proof of work");
+
+    // Re-validate the actual hash-against-target with height context. The
+    // pre-context CheckBlockHeader path skipped this for non-auxpow blocks
+    // because the active PoW algorithm depends on height (GhostRider vs
+    // RandomXv2). Auxpow blocks were already checked there and are
+    // re-checked here cheaply (idempotent). Skipped when fCheckPOW=false
+    // (TestBlockValidity called on an unmined block template).
+    if (fCheckPOW && !CheckAuxPowProofOfWork(block, consensusParams, nHeight))
+        return state.DoS(100, false, REJECT_INVALID, "high-hash", false, "proof of work failed");
 
     // Check against checkpoints
     if (fCheckpointsEnabled) {
@@ -3431,7 +3440,7 @@ bool TestBlockValidity(CValidationState& state, const CChainParams& chainparams,
     indexDummy.nHeight = pindexPrev->nHeight + 1;
 
     // NOTE: CheckBlockHeader is called by CheckBlock
-    if (!ContextualCheckBlockHeader(block, state, pindexPrev, GetAdjustedTime()))
+    if (!ContextualCheckBlockHeader(block, state, pindexPrev, GetAdjustedTime(), fCheckPOW))
         return error("%s: Consensus::ContextualCheckBlockHeader: %s", __func__, FormatStateMessage(state));
     if (!CheckBlock(block, state, fCheckPOW, fCheckMerkleRoot))
         return error("%s: Consensus::CheckBlock: %s", __func__, FormatStateMessage(state));

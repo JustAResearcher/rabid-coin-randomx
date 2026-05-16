@@ -125,15 +125,21 @@ UniValue generateBlocks(std::shared_ptr<CReserveScript> coinbaseScript, int nGen
             LOCK(cs_main);
             IncrementExtraNonce(pblock, chainActive.Tip(), nExtraNonce);
         }
+        // The new block being mined has height (nHeight + 1) since nHeight here
+        // tracks chain tip pre-increment. Validators compute the block's PoW at
+        // pindexPrev->nHeight + 1, so the miner must use the same convention --
+        // otherwise activation-height-dependent algos (e.g. GhostRider/RandomXv2
+        // crossover) disagree on which hash function to apply at the boundary.
+        const int nNewBlockHeight = nHeight + 1;
         if (!nMineAuxPow) {
-            while (nMaxTries > 0 && pblock->nNonce < nInnerLoopCount && !CheckProofOfWork(pblock->GetPoWHash(nHeight), pblock->nBits, Params().GetConsensus(nHeight))) {
+            while (nMaxTries > 0 && pblock->nNonce < nInnerLoopCount && !CheckProofOfWork(pblock->GetPoWHash(nNewBlockHeight), pblock->nBits, Params().GetConsensus(nNewBlockHeight))) {
                 ++pblock->nNonce;
                 --nMaxTries;
             }
         } else {
             CAuxPow::initAuxPow(*pblock);
             CPureBlockHeader& miningHeader = pblock->auxpow->parentBlock;
-            while (nMaxTries > 0 && miningHeader.nNonce < nInnerLoopCount && !CheckProofOfWork(miningHeader.GetPoWHash(nHeight), pblock->nBits, Params().GetConsensus(nHeight))) {
+            while (nMaxTries > 0 && miningHeader.nNonce < nInnerLoopCount && !CheckProofOfWork(miningHeader.GetPoWHash(nNewBlockHeight), pblock->nBits, Params().GetConsensus(nNewBlockHeight))) {
                 ++miningHeader.nNonce;
                 --nMaxTries;
             }
