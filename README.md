@@ -1,8 +1,12 @@
 # RabidCoin (RABID)
 
-A Dogecoin fork using the RandomXv2 Proof-of-Work algorithm.
+RabidCoin is a Proof-of-Work cryptocurrency created by
+[Rabidminer](https://www.youtube.com/c/RabidMining). Starting at mainnet
+block **5,775,000** (~2026-06-12), the chain mines with **RandomXv2** — the
+same algorithm family as Monero — so it runs on commodity CPUs with no
+specialised hardware required.
 
-## Testnet Mining
+## Mining
 
 ### Pool
 - **Stratum**: `stratum.rabidmining.com:3333`
@@ -11,8 +15,8 @@ A Dogecoin fork using the RandomXv2 Proof-of-Work algorithm.
 - **Block Time**: ~60 seconds
 
 ### Miners
-RabidCoin uses RandomXv2, so any RandomX-capable miner works (e.g. **xmrig**,
-**srbminer-multi**). CPU mining is recommended.
+Any RandomX-capable miner works — **xmrig** and **srbminer-multi** are the
+most common choices.
 
 - **xmrig**: <https://github.com/xmrig/xmrig/releases>
 - **srbminer-multi**: <https://github.com/doktor83/SRBMiner-Multi/releases>
@@ -31,11 +35,24 @@ RabidCoin uses RandomXv2, so any RandomX-capable miner works (e.g. **xmrig**,
 3. Algo: `rx/0`
 4. Wallet template: `YOUR_WALLET.%WORKER_NAME%`
 
+## RandomXv2 activation
+
+Pre-activation, the chain runs the legacy GhostRider Proof-of-Work. At
+mainnet block **5,775,000**, the chain switches to RandomXv2 from that
+block onward. Auxiliary Proof-of-Work (merge-mining) is disabled at the
+same height to prevent legacy-algorithm hashrate from bypassing the new
+requirement via a synthesised parent header. Miners and pool operators
+should be ready to run an xmrig-compatible setup before the activation
+height is reached.
+
+Testnet activates at block 5,910,000; regtest does not activate (stays on
+GhostRider for fast local testing).
+
 ## Testnet Node
 - P2P: `194.163.150.15:17333`
 - DNS Seed: `testnet-seed.rabidmining.com`
 
 ## Links
-- [XMRig-Rabid Miner](https://github.com/RabidMining/xmrig-rabid)
-- [RabidMining.com](https://rabidmining.com)
+- YouTube: [Rabidminer](https://www.youtube.com/c/RabidMining)
+- Web: <https://rabidmining.com>
 - Twitter: [@MiningRabid](https://twitter.com/MiningRabid)

@@ -3084,6 +3084,19 @@ bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& sta
                                     __func__, pindexPrev->nHeight + 1, consensusParams.nHeightEffective),
                          REJECT_INVALID, "early-auxpow-block");
 
+    // Rabidcoin: Disallow AuxPow blocks at or after RandomXv2 activation.
+    // The auxpow validation path hashes the parent header with GhostRider
+    // (CPureBlockHeader::GetPoWHash() no-arg in primitives/pureheader.cpp).
+    // Leaving auxpow open after activation would let GhostRider hashrate
+    // bypass RandomX entirely by mining a synthesised parent header that
+    // commits to the rabid-coin block. Closing it here protects the swap.
+    if (consensusParams.nRandomXV2Height > 0
+        && (uint32_t)nHeight >= consensusParams.nRandomXV2Height
+        && block.IsAuxpow())
+        return state.DoS(100, error("%s : auxpow blocks disallowed at height %d (RandomXv2 active from %d)",
+                                    __func__, nHeight, consensusParams.nRandomXV2Height),
+                         REJECT_INVALID, "auxpow-after-randomx");
+
     // Check proof of work
     if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams))
         return state.DoS(100, false, REJECT_INVALID, "bad-diffbits", false, "incorrect proof of work");
