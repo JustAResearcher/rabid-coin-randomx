@@ -49,7 +49,8 @@ MiningPage::MiningPage(QWidget *parent) :
     }
     localIPStr = localIP;
     ui->localIPLabel->setText("Your IP: " + localIP + " | HiveOS Pool: " + localIP + ":3333");
-    ui->miningLog->append("=== RabidCoin Mining ===");
+    // TODO(randomx): PoW is now RandomXv2 (algo "rx/0"); stock xmrig works.
+    ui->miningLog->append("=== RabidCoin Mining (RandomXv2) ===");
     ui->miningLog->append("Public Pool: stratum.rabidmining.com:3333");
     ui->miningLog->append("Your Local Stratum: " + localIP + ":3333");
     ui->miningLog->append("Steps: 1) Start Daemon  2) Start Stratum  3) Start Mining");
@@ -177,15 +178,17 @@ void MiningPage::startMining()
 
     QString appDir = QCoreApplication::applicationDirPath();
 
+    // TODO(randomx): chain switched from GR-Rabid to RandomXv2. Stock xmrig
+    // supports algo rx/0 out of the box; legacy xmrig-rabid is no longer needed.
     #ifdef Q_OS_WIN
-        QString minerPath = appDir + "/xmrig-rabid.exe";
+        QString minerPath = appDir + "/xmrig.exe";
     #else
-        QString minerPath = appDir + "/xmrig-rabid";
+        QString minerPath = appDir + "/xmrig";
     #endif
 
     if (!QFile::exists(minerPath)) {
-        ui->miningLog->append("Error: xmrig-rabid not found at " + minerPath);
-        ui->miningLog->append("Place xmrig-rabid in the same folder as the wallet.");
+        ui->miningLog->append("Error: xmrig not found at " + minerPath);
+        ui->miningLog->append("Place xmrig (RandomX-capable) in the same folder as the wallet.");
         return;
     }
 
@@ -195,7 +198,7 @@ void MiningPage::startMining()
 
     QStringList args;
     args << "-o" << pool
-         << "-a" << "gr-rabid"
+         << "-a" << "rx/0"
          << "-u" << user
          << "-p" << "x"
          << "--threads=" + QString::number(threads)
@@ -329,9 +332,12 @@ void MiningPage::onMinerOutput()
         ui->acceptedShares->setText(QString::number(acceptedShares));
     }
 
+    // TODO(randomx): old filter dropped "GR_RABID:" debug lines from xmrig-rabid;
+    // stock xmrig emits "randomx" prefix instead. Verify filter still suppresses
+    // the right noise once a real RandomX-capable build is wired up.
     QStringList lines = text.split("\n");
     for (const QString &line : lines) {
-        if (!line.contains("GR_RABID:") && !line.trimmed().isEmpty()) {
+        if (!line.contains("randomx ") && !line.trimmed().isEmpty()) {
             ui->miningLog->append(line.trimmed());
         }
     }

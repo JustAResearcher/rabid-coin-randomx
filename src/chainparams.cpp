@@ -152,6 +152,10 @@ public:
         nDefaultPort = 7333;
         nPruneAfterHeight = 100000;
 
+        // TODO(randomx): nNonce was mined under GhostRider and does NOT satisfy
+        // RandomXv2 PoW. Re-mine with calc_merkle.py --mine-genesis (stub) and
+        // update both nNonce and the hashGenesisBlock assert below before launch.
+        // The chain will not bootstrap on these committed values post-swap.
         genesis = CreateGenesisBlock(1743380000, 573888, 0x1e0ffff0, 1, 88 * COIN);
 
         consensus.hashGenesisBlock = genesis.GetHash();
@@ -309,6 +313,10 @@ public:
         nDefaultPort = 17333;
         nPruneAfterHeight = 1000;
 
+        // TODO(randomx): nNonce was mined under GhostRider and does NOT satisfy
+        // RandomXv2 PoW. Re-mine with calc_merkle.py --mine-genesis (stub) and
+        // update both nNonce and the hashGenesisBlock assert below before launch.
+        // The chain will not bootstrap on these committed values post-swap.
         genesis = CreateGenesisBlock(1391503289, 2539507, 0x1e0ffff0, 1, 88 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
         digishieldConsensus.hashGenesisBlock = consensus.hashGenesisBlock;
@@ -440,6 +448,10 @@ public:
         nDefaultPort = 18444;
         nPruneAfterHeight = 1000;
 
+        // TODO(randomx): nNonce was mined under GhostRider and does NOT satisfy
+        // RandomXv2 PoW. Re-mine with calc_merkle.py --mine-genesis (stub) and
+        // update both nNonce and the hashGenesisBlock assert below before launch.
+        // The chain will not bootstrap on these committed values post-swap.
         genesis = CreateGenesisBlock(1296688602, 0, 0x207fffff, 1, 88 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
         digishieldConsensus.hashGenesisBlock = consensus.hashGenesisBlock;

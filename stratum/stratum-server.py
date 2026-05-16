@@ -95,7 +95,8 @@ jobs_lock = threading.Lock()
 
 def make_job(template, miner_addr=COINBASE_ADDR):
     job_id = binascii.hexlify(os.urandom(4)).decode()
-    # Send values in node LE format (XMRig GR_RABID doesn't swap)
+    # Send values in node LE format (RandomX/xmrig rx/0 doesn't swap)
+    # TODO(randomx): chain now uses RandomXv2 (rx/0); confirm xmrig stratum byte-order still matches
     prevhash = bytes.fromhex(template['previousblockhash'])[::-1].hex()
     version = struct.pack('<I', template['version']).hex()
     nbits = struct.pack('<I', int(template['bits'], 16)).hex()

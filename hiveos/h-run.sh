@@ -6,7 +6,9 @@ fi
 # Source wallet config to get CUSTOM_TEMPLATE, CUSTOM_URL etc
 source /hive-config/wallet.conf 2>/dev/null
 
-DIR="/hive/miners/custom/xmrig-rabid"
+# TODO(randomx): RabidCoin PoW is now RandomXv2 (rx/0). Stock xmrig handles rx/0
+# natively; legacy xmrig-rabid binary is no longer required.
+DIR="/hive/miners/custom/xmrig"
 export LD_LIBRARY_PATH=$DIR/libs:$LD_LIBRARY_PATH
 POOL=${CUSTOM_URL:-"stratum.rabidmining.com:3333"}
 [[ "$POOL" != stratum+tcp://* ]] && POOL="stratum+tcp://$POOL"
@@ -23,7 +25,7 @@ cat > $DIR/config.json << EOJSON
         "url": "$POOL",
         "user": "$WALLET.$WORKER",
         "pass": "x",
-        "algo": "gr-rabid",
+        "algo": "rx/0",
         "keepalive": true,
         "nicehash": false,
         "tls": false
@@ -37,4 +39,4 @@ cat > $DIR/config.json << EOJSON
 }
 EOJSON
 
-exec $DIR/xmrig-rabid --config=$DIR/config.json $CUSTOM_USER_CONFIG
+exec $DIR/xmrig --config=$DIR/config.json $CUSTOM_USER_CONFIG

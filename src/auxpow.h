@@ -180,6 +180,7 @@ public:
   inline uint256
   getParentBlockPoWHash() const
   {
+    // TODO(randomx): thread block height here for correct RX epoch
     return parentBlock.GetPoWHash ();
   }
 

@@ -104,6 +104,7 @@ bool CheckAuxPowProofOfWork(const CBlockHeader& block, const Consensus::Params& 
             return error("%s : no auxpow on block with auxpow version",
                          __func__);
 
+        // TODO(randomx): thread block height here for correct RX epoch
         if (!CheckProofOfWork(block.GetPoWHash(), block.nBits, params))
             return error("%s : non-AUX proof of work failed", __func__);
 
