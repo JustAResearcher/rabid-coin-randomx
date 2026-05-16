@@ -4,6 +4,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 #include "primitives/pureheader.h"
 #include "chainparams.h"
+#include "crypto/gr_hash/gr_hash.h"
 #include "crypto/randomx_rabid/randomx_rabid.h"
 #include "hash.h"
 #include "utilstrencodings.h"
@@ -19,12 +20,20 @@ uint256 CPureBlockHeader::GetHash() const
 }
 uint256 CPureBlockHeader::GetPoWHash() const
 {
-    return GetPoWHash(0);
+    // No-arg form is reached from legacy paths without height context:
+    // auxpow parent-block verification and pre-context header sync. Stay
+    // on GhostRider here — auxpow parents are GhostRider-merge-mined,
+    // and headers seen pre-context are below any sane RandomX activation.
+    const uint8_t* pbegin = (const uint8_t*)BEGIN(nVersion);
+    return GhostriderHash(pbegin, 80);
 }
 
 
 uint256 CPureBlockHeader::GetPoWHash(uint32_t nHeight) const
 {
     const uint8_t* pbegin = (const uint8_t*)BEGIN(nVersion);
-    return RandomXV2Hash(nHeight, pbegin, 80);
+    const Consensus::Params& params = Params().GetConsensus(nHeight);
+    if (params.nRandomXV2Height > 0 && nHeight >= params.nRandomXV2Height)
+        return RandomXV2Hash(nHeight, pbegin, 80);
+    return GhostriderHash(pbegin, 80);
 }

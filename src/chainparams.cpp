@@ -122,6 +122,12 @@ public:
         consensus.fAllowLegacyBlocks = true;
         consensus.nHeightEffective = 0;
 
+        // RandomXv2 activation. Estimated mainnet tip 2026-05-15 is ~5,705,000
+        // (extrapolated from chainTxData below at ~1352 blocks/day). Activation
+        // at 5,775,000 is ~28 days from then. Must be set on `consensus` BEFORE
+        // the digishield/auxpow copies so the whole tree inherits it.
+        consensus.nRandomXV2Height = 5775000;
+
         // Blocks 145000 - 371336 are Digishield without AuxPoW
         digishieldConsensus = consensus;
         digishieldConsensus.nHeightEffective = 1;
@@ -152,10 +158,6 @@ public:
         nDefaultPort = 7333;
         nPruneAfterHeight = 100000;
 
-        // TODO(randomx): nNonce was mined under GhostRider and does NOT satisfy
-        // RandomXv2 PoW. Re-mine with calc_merkle.py --mine-genesis (stub) and
-        // update both nNonce and the hashGenesisBlock assert below before launch.
-        // The chain will not bootstrap on these committed values post-swap.
         genesis = CreateGenesisBlock(1743380000, 573888, 0x1e0ffff0, 1, 88 * COIN);
 
         consensus.hashGenesisBlock = genesis.GetHash();
@@ -279,6 +281,12 @@ public:
         consensus.nHeightEffective = 0;
         consensus.fAllowLegacyBlocks = true;
 
+        // RandomXv2 activation on testnet. Set just above the testnet
+        // defaultAssumeValid (5,900,000) so the swap activates very soon
+        // after a node syncs to tip — gives operators a live test surface
+        // before mainnet activation. Adjust as needed after measuring tip.
+        consensus.nRandomXV2Height = 5910000;
+
         // Blocks 145000 - 157499 are Digishield without minimum difficulty on all blocks
         digishieldConsensus = consensus;
         digishieldConsensus.nHeightEffective = 1;
@@ -313,10 +321,6 @@ public:
         nDefaultPort = 17333;
         nPruneAfterHeight = 1000;
 
-        // TODO(randomx): nNonce was mined under GhostRider and does NOT satisfy
-        // RandomXv2 PoW. Re-mine with calc_merkle.py --mine-genesis (stub) and
-        // update both nNonce and the hashGenesisBlock assert below before launch.
-        // The chain will not bootstrap on these committed values post-swap.
         genesis = CreateGenesisBlock(1391503289, 2539507, 0x1e0ffff0, 1, 88 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
         digishieldConsensus.hashGenesisBlock = consensus.hashGenesisBlock;
@@ -427,6 +431,12 @@ public:
         consensus.fSimplifiedRewards = true;
         consensus.nCoinbaseMaturity = 60; // For easier testability in RPC tests
 
+        // RandomXv2 disabled on regtest (0 = disabled). RandomX in light mode
+        // costs ~1ms per hash + several seconds of cache init; that hurts the
+        // per-test bring-up time. Tests stay on GhostRider unless explicitly
+        // overridden by a future regtest flag.
+        consensus.nRandomXV2Height = 0;
+
         digishieldConsensus = consensus;
         digishieldConsensus.nHeightEffective = 10;
         digishieldConsensus.nPowTargetTimespan = 1; // regtest: also retarget every second in digishield mode, for conformity
@@ -448,10 +458,6 @@ public:
         nDefaultPort = 18444;
         nPruneAfterHeight = 1000;
 
-        // TODO(randomx): nNonce was mined under GhostRider and does NOT satisfy
-        // RandomXv2 PoW. Re-mine with calc_merkle.py --mine-genesis (stub) and
-        // update both nNonce and the hashGenesisBlock assert below before launch.
-        // The chain will not bootstrap on these committed values post-swap.
         genesis = CreateGenesisBlock(1296688602, 0, 0x207fffff, 1, 88 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
         digishieldConsensus.hashGenesisBlock = consensus.hashGenesisBlock;
